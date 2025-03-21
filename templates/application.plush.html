@@ -3,7 +3,7 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
-    <title>Buffalo - Aichat Golang</title>
+    <title>AI Chat - <%= title %></title>
     <%= stylesheetTag("application.css") %>
     <meta name="csrf-param" content="authenticity_token" />
     <meta name="csrf-token" content="<%= authenticity_token %>" />
@@ -12,10 +12,13 @@
   <body>
 
     <div class="container">
-      <%= partial("flash.html") %>
+      <%= partial("components/navbar.html") %>
       <%= yield %>
     </div>
 
     <%= javascriptTag("application.js") %>
+    <%= if (javscript) { %>
+      <%= javascriptTag(javscript) %>
+    <% } %>
   </body>
 </html>

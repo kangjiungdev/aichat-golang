@@ -67,6 +67,12 @@ func App() *buffalo.App {
 
 		app.GET("/", HomeHandler)
 
+		app.GET("/chat", ChatPage)
+
+		app.GET("/create-character", CreateCharacterPage)
+
+		app.POST("/create-character", CreateCharacterOnDB)
+
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	})
 

@@ -14,7 +14,8 @@ const configurator = {
       ],
     }
 
-    Glob.sync("./assets/*/*.*").forEach((entry) => {
+    // assets 하위 폴더의 파일도 검색 가능
+    Glob.sync("./assets/**/*.*").forEach((entry) => {
       if (entry === './assets/css/application.scss') {
         return
       }
@@ -73,9 +74,9 @@ const configurator = {
           ]
         },
         { test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/},
-        { test: /\.jsx?$/,loader: "babel-loader",exclude: /node_modules/ },
-        { test: /\.(woff|woff2|ttf|svg)(\?v=\d+\.\d+\.\d+)?$/,use: "url-loader"},
-        { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,use: "file-loader" },
+        { test: /\.jsx?$/, loader: "babel-loader", exclude: /node_modules/ },
+        { test: /\.(woff|woff2|ttf|svg)(\?v=\d+\.\d+\.\d+)?$/, use: "url-loader"},
+        { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: "file-loader" },
         { test: /\.go$/, use: "gopherjs-loader"}
       ]
     }

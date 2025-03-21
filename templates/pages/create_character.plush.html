@@ -1,0 +1,59 @@
+<div>
+    <%= form({action: "/create-character", method: "POST", enctype: "multipart/form-data"}) { %>
+        <div> <!-- 캐릭터 이름 -->
+            <label for="character-name">
+                <p><span class="required">*</span>캐릭터 이름</p>
+                <%= f.InputTag({name: "character-name", id: "character-name", maxlength: "15", placeholder: "캐릭터 이름을 입력해 주세요."}) %>
+            </label>
+        </div>
+        <div> <!-- 캐릭터 소개 -->
+            <label for="character-info">
+                <p><span class="required">*</span>캐릭터 소개</p>
+                <%= f.TextArea({name: "character-info", id: "character-info", maxlength: "1000", placeholder: "캐릭터 소개를 입력해 주세요."}) %>
+            </label>
+        </div>
+        <div> <!-- 캐릭터 성별 -->
+            <p style="cursor: default;"><span class="required">*</span>캐릭터 성별</p>
+            <label for="character-gender-male">
+                <input type="radio" name="character-gender" value="male" id="character-gender-male"> 남성
+            </label>
+            <label for="character-gender-female">
+                <input type="radio" name="character-gender" value="female" id="character-gender-female"> 여성
+            </label>
+            <label for="character-gender-etc">
+                <input type="radio" name="character-gender" value="etc" id="character-gender-etc"> 기타
+            </label>
+        </div>
+        <div> <!-- 한줄 소개 -->
+            <label for="character-oneline-info">
+                <p><span class="required">*</span>한줄 소개</p>
+                <%= f.InputTag({name: "character-oneline-info", id: "character-oneline-info", maxlength: "50", placeholder: "캐릭터 및 세계관에 대한 간략한 소개를 입력해 주세요."}) %>
+            </label>
+        </div>
+        <div> <!-- 세계관 설정 -->
+            <label for="world-view">
+                <p>세계관</p>
+                <%= f.TextArea({name: "world-view", id: "world-view", maxlength: "1000", placeholder: "세계관을 입력해 주세요."}) %>
+            </label>
+        </div>
+        <div> <!-- 첫 메시지 -->
+            <label for="first-msg-character">
+                <p>첫 메시지</p>
+                <%= f.TextArea({name: "first-msg-character", id: "first-msg-character", maxlength: "500", placeholder: "캐릭터가 건넬 첫 인사말을 입력해 주세요."}) %>
+            </label>
+        </div>
+        <div> <!-- 캐릭터 이미지 -->
+            <label for="character-assets">
+                <p><span class="required">*</span>캐릭터 에셋</p>
+                <%= f.FileTag({accept: "image/*", multiple: "true", name: "character-assets", id: "character-assets"}) %>
+            </label>
+        </div>
+        <div> <!-- 제작자 코멘트 -->
+            <label for="creator-comment">
+                <p>제작자 코멘트</p>
+                <%= f.TextArea({name: "creator-comment", id: "creator-comment", maxlength: "1000", placeholder: "이용자들에게 전할 메시지를 입력해 주세요."}) %>
+            </label>
+        </div>
+        <button>생성</button>
+    <% } %>
+</div>
