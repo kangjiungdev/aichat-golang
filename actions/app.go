@@ -73,6 +73,8 @@ func App() *buffalo.App {
 
 		app.POST("/create-character", CreateCharacterOnDB)
 
+		app.GET("/create-character-success", CreateCharacterSuccess)
+
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	})
 

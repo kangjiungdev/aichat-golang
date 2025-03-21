@@ -1,5 +1,5 @@
 <div>
-    <%= form({action: "/create-character", method: "POST", enctype: "multipart/form-data"}) { %>
+    <%= form({action: "/create-character", method: "POST", id: "create-character-form", enctype: "multipart/form-data"}) { %>
         <div> <!-- 캐릭터 이름 -->
             <label for="character-name">
                 <p><span class="required">*</span>캐릭터 이름</p>
