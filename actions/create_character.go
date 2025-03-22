@@ -29,7 +29,7 @@ func CreateCharacterPage(c buffalo.Context) error {
 func CreateCharacterOnDB(c buffalo.Context) error {
 	user, _ := LogIn(c)
 	now := time.Now()
-	createat, err := time.Parse("2006-01-02", time.Now().Format("2006-01-02"))
+	createat, err := time.Parse("2006-01-02", now.Format("2006-01-02"))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -43,7 +43,7 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 		gender = "기타"
 	}
 
-	character := &models.CharacterData{
+	character := &models.Character{
 		CreatorID:            user.ID,
 		CharacterName:        c.Request().FormValue("character-name"),
 		CharacterInfo:        c.Request().FormValue("character-info"),

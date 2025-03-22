@@ -40,7 +40,7 @@ func (u User) TableName() string {
 	return "users"
 }
 
-type CharacterData struct {
+type Character struct {
 	ID                   int         `json:"id" db:"id"`
 	CreatorID            int         `json:"creator" db:"creator_id"`
 	CharacterName        string      `json:"character_name" form:"character-name" db:"character_name"`
@@ -54,8 +54,21 @@ type CharacterData struct {
 	CreatedAt            time.Time   `json:"created_at" db:"created_at"`
 }
 
-func (c CharacterData) TableName() string {
+func (c Character) TableName() string {
 	return "characters"
+}
+
+type Chat struct {
+	ID          int         `json:"id" db:"id"`
+	UserID      int         `json:"user_id" db:"user_id"`
+	CharacterID int         `json:"character_id" form:"character-id" db:"character_id"`
+	UserMessage StringArray `json:"user_message" form:"user_message" db:"user_message"`
+	AiMessage   StringArray `json:"ai_message" form:"ai_message" db:"ai_message"`
+	CreatedAt   time.Time   `json:"created_at" db:"created_at"`
+}
+
+func (c Chat) TableName() string {
+	return "chats"
 }
 
 // DB is a connection to your database to be used

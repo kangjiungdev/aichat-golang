@@ -1,3 +1,7 @@
 <div>
     <h1><%= title %> Page</h1>
+    <%= for (character) in characters { %>
+        <%= form({action: "/chat/"+(character.ID), method: "POST", class: "create-chat-form"}) { %>
+            <button><%= character.CharacterName %></button>
+    <% }} %>
 </div>

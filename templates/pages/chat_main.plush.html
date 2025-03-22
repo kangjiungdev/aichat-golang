@@ -1,0 +1,13 @@
+<div>
+    <%= for (chat) in chats { %>
+        <%= for (character) in characters { %>
+          <%= if (character.ID == chat.CharacterID) { %>
+            <%= if (chat.UserID == user.ID) { %>
+              <%= form({action: "/chat/"+(chat.ID), method: "GET", class: "chat-form"}) { %>
+                <button type="button" onclick="location.href='/chat/<%= chat.ID %>'"><%= character.CharacterName %></button>
+              <% } %>
+            <% } %>
+          <% } %>
+        <% } %>
+      <% } %>
+</div>
