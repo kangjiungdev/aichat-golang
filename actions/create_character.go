@@ -1,44 +1,61 @@
 package actions
 
 import (
+	"aichat_golang/models"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/google/uuid"
 )
 
-type CreateCharcterData struct {
-	CharacterName        string     `form:"character-name"`
-	CharacterInfo        string     `form:"character-info"`
-	CharacterGender      string     `form:"character-gender"`
-	CharacterOnelineInfo string     `form:"character-oneline-info"`
-	WorldView            string     `form:"world-view"`
-	FirstMsgCharacter    string     `form:"first-msg-character"`
-	CharacterAssets      []*os.File `form:"character-assets"`
-	CreatorComment       string     `form:"creator-comment"`
-}
-
 func CreateCharacterPage(c buffalo.Context) error {
+	user, err := LogIn(c)
+	if err != nil {
+		fmt.Println(err)
+		c.Redirect(http.StatusSeeOther, "/login")
+	}
 	c.Set("title", "Create Character")
-	c.Set("javscript", "pages/create_character.js")
+	c.Set("login", true)
+	c.Set("user", user)
+	c.Set("javascript", "pages/create_character.js")
 	return c.Render(http.StatusOK, r.HTML("pages/create_character.plush.html"))
 }
 
 func CreateCharacterOnDB(c buffalo.Context) error {
-	CharacterData := CreateCharcterData{
+	user, _ := LogIn(c)
+	now := time.Now()
+	createat, err := time.Parse("2006-01-02", time.Now().Format("2006-01-02"))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var gender string
+	if i := c.Request().FormValue("character-gender"); i == "male" {
+		gender = "남자"
+	} else if i == "female" {
+		gender = "여자"
+	} else {
+		gender = "기타"
+	}
+
+	character := &models.CharacterData{
+		CreatorID:            user.ID,
 		CharacterName:        c.Request().FormValue("character-name"),
 		CharacterInfo:        c.Request().FormValue("character-info"),
-		CharacterGender:      c.Request().FormValue("character-gender"),
+		CharacterGender:      gender,
 		CharacterOnelineInfo: c.Request().FormValue("character-oneline-info"),
 		WorldView:            c.Request().FormValue("world-view"),
 		FirstMsgCharacter:    c.Request().FormValue("first-msg-character"),
 		CreatorComment:       c.Request().FormValue("creator-comment"),
+		CreatedAt:            createat,
 	}
 
-	dirname := "assets/images/character_img"
+	dirname := "assets/images/character_img/"
 	os.MkdirAll(dirname, 0777)
 
 	for _, n := range c.Request().MultipartForm.File["character-assets"] {
@@ -47,7 +64,9 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 			fmt.Println(err)
 			continue
 		}
-		path := fmt.Sprintf("%s/%s", dirname, filepath.Base(n.Filename))
+		fileName := fmt.Sprintf("%s_user%d_%s%s", now.Format("20060102_150405"), character.CreatorID, uuid.New().String(), filepath.Ext(n.Filename))
+		fmt.Println(fileName)
+		path := fmt.Sprintf("%s/%s", dirname, fileName)
 		file, err := os.Create(path)
 		if err != nil {
 			fmt.Println(err)
@@ -58,15 +77,15 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 		if err != nil {
 			fmt.Println(err)
 		}
-		CharacterData.CharacterAssets = append(CharacterData.CharacterAssets, file)
+		character.CharacterAssets = append(character.CharacterAssets, path)
 		uploadFile.Close()
 		file.Close()
 	}
 
-	return c.Redirect(303, "/create-character-success")
-}
+	if err := models.DB.Create(character); err != nil {
+		fmt.Println(err)
+		return c.Render(http.StatusInternalServerError, r.String(err.Error()))
+	}
 
-func CreateCharacterSuccess(c buffalo.Context) error {
-	c.Set("title", "Create Character Success")
-	return c.Render(http.StatusOK, r.HTML("pages/complete-create-character.plush.html"))
+	return c.Redirect(http.StatusSeeOther, "/create-success?what=character")
 }

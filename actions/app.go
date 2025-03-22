@@ -65,6 +65,14 @@ func App() *buffalo.App {
 		// Setup and use translations:
 		app.Use(translations())
 
+		app.GET("/signup", SignUp)
+		app.POST("/signup", CreateAccountInDB)
+
+		app.GET("/login", LogInPage)
+		app.POST("/login", GetUserData)
+
+		app.POST("/logout", LogOut)
+
 		app.GET("/", HomeHandler)
 
 		app.GET("/chat", ChatPage)
@@ -73,7 +81,7 @@ func App() *buffalo.App {
 
 		app.POST("/create-character", CreateCharacterOnDB)
 
-		app.GET("/create-character-success", CreateCharacterSuccess)
+		app.GET("/create-success", CreateSuccess)
 
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	})

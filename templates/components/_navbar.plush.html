@@ -2,8 +2,20 @@
     <nav>
         <div>
             <a href="/">Home</a>
-            <a href="/chat">AI Chat</a>
-            <a href="create-character">Create Character</a>
+            <%= if (login) { %>
+                <!-- 로그인 되었을 때 -->
+                <a href="/chat">AI Chat</a>
+                <a href="/create-character">Create Character</a>
+                <form id="logout-form" method="POST" action="/logout" style="display: inline;">
+                    <input type="hidden" name="authenticity_token" value="<%= authenticity_token %>">
+                    <button type="submit">Log Out</button>
+                  </form>
+                <a href="/"><%= user.UserID %></a>
+              <% } else { %>
+                <!-- 로그인 안 되었을 때 -->
+                <a href="/login">Log in</a>
+                <a href="/signup">Sign Up</a>
+              <% } %>
         </div>
     </nav>
 </header>

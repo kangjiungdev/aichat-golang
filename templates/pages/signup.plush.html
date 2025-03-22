@@ -1,0 +1,41 @@
+<div>
+    <%= form({action: "/signup", id: "signup-form", method: "POST"}) { %>
+        <div> <!-- 아이디 -->
+            <label for="user-id">
+                <p>아이디</p>
+                <%= f.InputTag({name: "user-id", id: "user-id", maxlength: "15", placeholder: "아이디 입력(6~15자)"}) %>
+            </label>
+        </div>
+        <div> <!-- 비밀번호 -->
+            <label for="password">
+                <p>비밀번호</p>
+                <%= f.InputTag({name: "password", id: "password", autocomplete: "off", maxlength: "20", type: "password", placeholder: "비밀번호 입력(8자~20자)"}) %>
+            </label>
+        </div>
+        <div> <!-- 비밀번호 확인 -->
+            <label for="password-check">
+                <p>비밀번호 확인</p>
+                <%= f.InputTag({id: "password-check", maxlength: "20", autocomplete: "off", type: "password", placeholder: "비밀번호 재입력"}) %>
+            </label>
+        </div>
+        <div> <!-- 이름 -->
+            <label for="name">
+                <p>이름</p>
+                <%= f.InputTag({name: "name", id: "name", maxlength: "15", placeholder: "이름을 입력해 주세요."}) %>
+            </label>
+        </div>
+        <div> <!-- 전화번호 -->
+            <label for="phone-number">
+                <p>전화번호</p>
+                <%= f.InputTag({name: "phone-number", id: "phone-number", type:"tel", maxlength:"13", placeholder: "전화번호 입력"}) %>
+            </label>
+        </div>
+        <div> <!-- 생년월일 -->
+            <label for="birth-date">
+                <p>생년월일</p>
+                <%= f.InputTag({type: "date", name: "birth-date", id: "birth-date", max: today, min: hundredYearsAgo}) %>
+            </label>
+        </div>
+        <button>Sign Up</button>
+    <% } %>
+</div>
