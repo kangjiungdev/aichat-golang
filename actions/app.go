@@ -57,6 +57,7 @@ func App() *buffalo.App {
 		// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 		// Remove to disable this.
 		app.Use(csrf.New)
+		app.Middleware.Skip(csrf.New, DeleteChat)
 
 		// Wraps each request in a transaction.
 		//   c.Value("tx").(*pop.Connection)
@@ -78,13 +79,14 @@ func App() *buffalo.App {
 		app.GET("/chat", ChatMainPage)
 		app.GET("/chat/{chat_id}", ChatPage)
 		app.POST("/chat/{character_id}", CreateChat)
+		app.DELETE("/chat/{chat_id}", DeleteChat)
 		app.POST("/ai-response", ResponseOfAI)
 
 		app.GET("/create-character", CreateCharacterPage)
 
 		app.POST("/create-character", CreateCharacterOnDB)
 
-		app.GET("/create-success", CreateSuccess)
+		app.GET("/success/{act}", Success)
 
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	})

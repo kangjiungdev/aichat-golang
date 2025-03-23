@@ -100,6 +100,33 @@ func CreateChat(c buffalo.Context) error {
 	return c.Redirect(http.StatusSeeOther, url)
 }
 
+func DeleteChat(c buffalo.Context) error {
+	fmt.Println("delete request")
+
+	user, err := LogIn(c)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/login")
+	}
+
+	chatID := c.Param("chat_id")
+	chat := &models.Chat{}
+
+	if err := models.DB.Find(chat, chatID); err != nil {
+		fmt.Println("Can't Find Chat:", err)
+		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다"))
+	}
+
+	if chat.UserID != user.ID {
+		return c.Render(http.StatusForbidden, r.String("권한 없음"))
+	}
+
+	if err := models.DB.Destroy(chat); err != nil {
+		return c.Render(http.StatusInternalServerError, r.String("삭제 실패:", err))
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/success/delete?what=chat")
+}
+
 type DataForAI struct {
 	MyName          string `json:"my_name"`
 	MyInfo          string `json:"my_info"`

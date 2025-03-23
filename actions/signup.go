@@ -96,5 +96,5 @@ func CreateAccountInDB(c buffalo.Context) error {
 	c.Session().Set("current_user_id", user.ID)
 	c.Session().Save()
 
-	return c.Redirect(http.StatusSeeOther, "/create-success?what=account")
+	return c.Redirect(http.StatusSeeOther, "/success/create?what=account")
 }

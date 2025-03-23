@@ -87,5 +87,5 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 		return c.Render(http.StatusInternalServerError, r.String(err.Error()))
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/create-success?what=character")
+	return c.Redirect(http.StatusSeeOther, "/success/create?what=character")
 }

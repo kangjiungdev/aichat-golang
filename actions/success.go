@@ -7,7 +7,8 @@ import (
 	"github.com/gobuffalo/buffalo"
 )
 
-func CreateSuccess(c buffalo.Context) error {
+func Success(c buffalo.Context) error {
+	act := c.Param("act")
 	what := c.Request().URL.Query().Get("what")
 	var FirstStringUpperWhat string
 	if what == "" {
@@ -20,7 +21,7 @@ func CreateSuccess(c buffalo.Context) error {
 	}
 
 	FirstStringUpperWhat = strings.ToUpper(what[:1]) + what[1:]
-	c.Set("title", FirstStringUpperWhat+" successfully created")
-	c.Set("createWhat", FirstStringUpperWhat)
-	return c.Render(http.StatusOK, r.HTML("pages/create_success.plush.html"))
+	c.Set("title", FirstStringUpperWhat+" successfully "+act+"d")
+	c.Set("success", FirstStringUpperWhat+" successfully "+act+"d")
+	return c.Render(http.StatusOK, r.HTML("pages/success.plush.html"))
 }
