@@ -2,11 +2,16 @@ package actions
 
 import (
 	"aichat_golang/models"
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
+	anthropic "github.com/anthropics/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/gobuffalo/buffalo"
 )
 
@@ -93,4 +98,113 @@ func CreateChat(c buffalo.Context) error {
 	}
 	url := fmt.Sprintf("/chat/%d", chat.ID)
 	return c.Redirect(http.StatusSeeOther, url)
+}
+
+type DataForAI struct {
+	MyName          string `json:"my_name"`
+	MyInfo          string `json:"my_info"`
+	CharacterName   string `json:"character_name"`
+	CharacterInfo   string `json:"character_info"`
+	CharacterGender string `json:"character_gender"`
+	WorldView       string `json:"world_view"`
+	Message         string `json:"message"`
+}
+
+type Conversation struct {
+	Role    string
+	Content string
+}
+
+func ResponseOfAI(c buffalo.Context) error {
+
+	apiKey := os.Getenv("ANTHROPIC_API_KEY")
+	client := anthropic.NewClient(
+		option.WithAPIKey(apiKey),
+	)
+	chatID := c.Request().FormValue("chat-id")
+	chat := &models.Chat{}
+	err := models.DB.Where("id = ?", chatID).First(chat)
+	if err != nil {
+		fmt.Println("에러: ", err)
+		return c.Render(http.StatusBadRequest, r.String(err.Error()))
+	}
+	character := &models.Character{}
+	err = models.DB.Where("id = ?", chat.CharacterID).First(character)
+	if err != nil {
+		fmt.Println("에러: ", err)
+		return c.Render(http.StatusBadRequest, r.String(err.Error()))
+	}
+
+	userName := c.Request().FormValue("my-name-input")
+	userInfo := c.Request().FormValue("my-info-input")
+	userMsg := c.Request().FormValue("chat-input")
+	dataforai := DataForAI{
+		MyName:          fmt.Sprintf("내 이름은 '%s'(이)다.", userName),
+		MyInfo:          fmt.Sprintf("내 객관적인 정보: %s", userInfo),
+		CharacterName:   fmt.Sprintf("네 이름은 '%s'(이)다.", character.CharacterName),
+		CharacterInfo:   fmt.Sprintf("네 객관적인 정보: %s", character.CharacterInfo),
+		CharacterGender: fmt.Sprintf("네 성별은 '%s'다.", character.CharacterGender),
+		WorldView:       fmt.Sprintf("세계관 설정: %s", character.WorldView),
+	}
+
+	jsonBytes, err := json.Marshal(dataforai)
+	if err != nil {
+		fmt.Println("json 변환 실패", err)
+		return c.Render(http.StatusBadRequest, r.String("json 변환 실패: ", err))
+	}
+
+	var previousConversation []Conversation
+	fmt.Println("user messages:", len(chat.UserMessage))
+	fmt.Println("ai messages:", len(chat.AiMessage))
+	for i := 0; i < len(chat.UserMessage); i++ {
+		previousConversation = append(previousConversation, Conversation{Role: "user", Content: chat.UserMessage[i]})
+		previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
+	}
+
+	msg := []anthropic.MessageParam{
+		anthropic.NewUserMessage(anthropic.NewTextBlock(string(jsonBytes))),
+		anthropic.NewAssistantMessage(anthropic.NewTextBlock(character.FirstMsgCharacter)),
+	}
+
+	if len(previousConversation) > 0 {
+		msg = append(msg, checkWho(previousConversation)...)
+	}
+
+	msg = append(msg, anthropic.NewUserMessage(anthropic.NewTextBlock(userMsg)))
+
+	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
+		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
+		MaxTokens: anthropic.F(int64(1024)),
+		Messages:  anthropic.F(msg),
+	})
+	if err != nil {
+		fmt.Println("API call failed", err)
+		return c.Render(http.StatusBadRequest, r.String("API call failed:", err))
+	}
+
+	fmt.Println(message.Content[0].Text)
+
+	chat.UserMessage = append(chat.UserMessage, userMsg)
+	chat.AiMessage = append(chat.AiMessage, message.Content[0].Text)
+
+	err = models.DB.Update(chat)
+
+	if err != nil {
+		fmt.Println("DB Update Error", err)
+		return c.Render(http.StatusOK, r.String("DB Update Error", err))
+	}
+
+	return c.Render(http.StatusOK, r.String(message.Content[0].Text))
+}
+
+func checkWho(previousConversation []Conversation) []anthropic.MessageParam {
+	var chat []anthropic.MessageParam
+	for _, conversation := range previousConversation {
+		if conversation.Role == "user" {
+			chat = append(chat, anthropic.NewUserMessage(anthropic.NewTextBlock(conversation.Content)))
+		} else {
+			chat = append(chat, anthropic.NewAssistantMessage(anthropic.NewTextBlock(conversation.Content)))
+		}
+	}
+	return chat
 }

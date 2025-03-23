@@ -78,6 +78,7 @@ func App() *buffalo.App {
 		app.GET("/chat", ChatMainPage)
 		app.GET("/chat/{chat_id}", ChatPage)
 		app.POST("/chat/{character_id}", CreateChat)
+		app.POST("/ai-response", ResponseOfAI)
 
 		app.GET("/create-character", CreateCharacterPage)
 
