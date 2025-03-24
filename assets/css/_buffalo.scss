@@ -6,30 +6,37 @@ body {
   background-color: #343A40;
   color: #ddd;
   font-family: Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
   margin: 0;
+  padding-top: 60px;
+  min-height: 100vh;
 }
 
 /* 공통 컨테이너 */
 .container {
-  width: 90%;
-  max-width: 600px;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  margin: 0 auto;
   box-sizing: border-box;
+}
+
+.ai-chat-div {
+  display: flex;
+  width: 100%;
+  height: 100%;
 }
 
 /* 채팅 박스 스타일 (길이 조정 안 함) */
 #chat-box {
-  width: 600px;
-  height: 400px; /* 기존 길이 유지 */
+  width: 100%;
+  height: 400px;
   background-color: #343A40;
-  border-radius: 10px;
   padding: 15px;
   overflow-y: auto;
+  box-sizing: border-box;
 }
+
 
 /* 입력 폼 스타일 */
 #chat-form {
@@ -110,22 +117,6 @@ body {
   margin-bottom: 1vw; /* 간격 추가 */
 }
 
-#delete-chat {
-  background-color: #444; /* 다크 그레이 배경 */
-  color: #fff; /* 흰색 텍스트 */
-  border: none;
-  border-radius: 0.4rem; /* 둥근 모서리 */
-  padding: 0.3rem 0.8rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-left: 1rem; /* 글씨와 버튼 사이 간격 (반응형) */
-}
-
 #chat-enter-button {
   background-color: #444; /* 기본 색상 */
   cursor: default;
@@ -135,4 +126,138 @@ body {
 #chat-enter-button.active:hover {
   background-color: #666666; /* 활성화 상태일 때만 색 변경 */
   cursor: pointer;
+}
+
+.home-character-image {
+  width: 236px;
+  height: 236px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.chat-character-image {
+  width: 550.4px;
+  height: 855px;
+  object-fit: cover;
+}
+
+.chat-conversation-image {
+  width: 122.391px;
+  height: 184px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+#nav-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #1f1f1f; /* 어두운 톤 배경 */
+  padding: 10px 20px;
+  z-index: 1000; /* 맨 위로 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#nav {
+  display: flex;
+  justify-content: center; /* 또는 space-evenly, space-between */
+  align-items: center;
+  width: 100%; /* 💥 중요! 전체 가로폭을 사용하게 함 */
+  background-color: #1f1f1f;
+  height: 5vh;
+  padding: 0 40px;
+}
+
+.nav-inner {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  width: 100%; /* 💥 추가로 이 div도 퍼뜨릴 수 있음 */
+  justify-content: space-evenly; /* 요소들 균등 분배 */
+}
+
+#nav a,
+#nav button {
+  color: #ffffff;
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#nav a:hover,
+#nav button:hover {
+  text-decoration: underline;
+}
+
+
+
+.chat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 한 줄에 3개 카드 */
+  gap: 24px;
+  padding: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.chat-card {
+  display: flex;
+  flex-direction: row;
+  background-color: #2d2f33;
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.chat-img {
+  width: 122px;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-buttons {
+  display: flex;
+  gap: 6px;
+  padding: 0 0px; /* 좌우 패딩 추가 */
+  box-sizing: border-box; /* 패딩 포함 */
+}
+
+.chat-buttons button {
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  background-color: #444;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chat-buttons button:hover {
+  background-color: #666;
+}
+
+.chat-footer {
+  font-size: 12px;
+  color: #aaa;
+  display: flex;
+  justify-content: space-between;
 }

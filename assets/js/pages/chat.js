@@ -1,18 +1,28 @@
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 const aiReqForm = document.getElementById("ai-req-form")
 const chatID = window.location.pathname.split("/")[2]
 const chatBox = document.getElementById("chat-box")
 const chatInput = document.getElementById("chat-input")
 const userNameInput = document.getElementById("my-name-input")
 const userInfoInput = document.getElementById("my-info-input")
-const deleteChatBtn = document.getElementById("delete-chat")
 const firstMessageOfCharacter = document.getElementById("first-message")
+let isSubmitting = false
 
 document.addEventListener("DOMContentLoaded", async() => {
+    const userName = localStorage.getItem("user_name")
+    const userInfo = localStorage.getItem("user_info")
+    if(userName) {
+        userNameInput.value = userName
+    }
+    if(userInfo) {
+        userInfoInput.value = userInfo
+    }
     try {
         const req = await fetch("/get-all-chat", {
             method:"POST",
             headers: {
-                "Content-Type": "text/plain"
+                "Content-Type": "text/plain",
+                "X-CSRF-Token": csrfToken
               },
             body: chatID
         })
@@ -21,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async() => {
             createChatBlock(res.user_message[i], "User")
             createChatBlock(res.ai_message[i], "AI")
         }
+        scrollToBottom()
     }
     catch (e) {
         console.error(e)
@@ -28,14 +39,19 @@ document.addEventListener("DOMContentLoaded", async() => {
 })
 aiReqForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if(isSubmitting) {
+        return
+    }
     if(chatInput.value.trim() === "" || userNameInput.value.trim() === "") {
         return
     }
+    isSubmitting = true
     chatInput.value = chatInput.value.trim()
     userNameInput.value = userNameInput.value.trim()
     userInfoInput.value = userInfoInput.value.trim()
 
     createChatBlock(chatInput.value, "User")
+    scrollToBottom()
 
     const form = new FormData(aiReqForm)
     form.append("chat-id", chatID)
@@ -44,24 +60,10 @@ aiReqForm.addEventListener("submit", async (event) => {
         const req = await fetch("/ai-response", {method:"POST", body: form})
         const res = await req.text()
         createChatBlock(res, "AI")
-    }
-    catch (e) {
+    }   catch (e) {
         console.error(e)
-    }
-})
-
-deleteChatBtn.addEventListener("click", async (event) => {
-    event.preventDefault();
-    try {
-        const req = await fetch(`/chat/${chatID}`, { method: "DELETE" })
-        if (req.redirected) {
-            window.location.href = req.url
-        }
-        const res = await req.text()
-        console.log(res)
-    }
-    catch (e) {
-        console.error(e)
+    } finally {
+        isSubmitting = false
     }
 })
 
@@ -76,12 +78,14 @@ if(firstMessageOfCharacter) {
         } else {
             chatSpan.innerText = object.act
                 chatSpan.classList.add("ai-action-chat")
-                chatBlock.classList.add("ai-chat-block-div")
         }
         chatSpan.classList.add("chat-span")
         firstMessageOfCharacter.appendChild(chatSpan)
     })
 }
+
+storageSetEvent(userNameInput, "user_name")
+storageSetEvent(userInfoInput, "user_info")
 
 function createChatBlock(chatContents, who) {
     const chatBlock = document.createElement("div");
@@ -130,6 +134,12 @@ function actionChat(chatContents) {
       }
     }
     return txtArray
+}
+
+function storageSetEvent(element, key) {
+    element.addEventListener("change", function() {
+        localStorage.setItem(key, this.value)
+    })
 }
 
 function scrollToBottom() {

@@ -55,7 +55,7 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 		CreatedAt:            createat,
 	}
 
-	dirname := "assets/images/character_img/"
+	dirname := "assets/images/character_img"
 	os.MkdirAll(dirname, 0777)
 
 	for _, n := range c.Request().MultipartForm.File["character-assets"] {

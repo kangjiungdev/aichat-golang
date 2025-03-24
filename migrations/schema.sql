@@ -48,12 +48,12 @@ DROP TABLE IF EXISTS `chats`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `chats` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `character_id` int NOT NULL,
-  `user_message` json NOT NULL,
-  `ai_message` json NOT NULL,
-  `created_at` date NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `character_id` int DEFAULT NULL,
+  `user_message` json DEFAULT NULL,
+  `ai_message` json DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -101,4 +101,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-23 18:53:22
+-- Dump completed on 2025-03-24 15:39:24

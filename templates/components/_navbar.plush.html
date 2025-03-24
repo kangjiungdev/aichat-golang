@@ -1,16 +1,16 @@
-<header>
-    <nav>
-        <div>
+<header id="nav-header">
+    <nav id="nav">
+        <div class="nav-inner">
             <a href="/">Home</a>
             <%= if (login) { %>
                 <!-- 로그인 되었을 때 -->
-                <a href="/chat">AI Chat</a>
-                <a href="/create-character">Create Character</a>
-                <form id="logout-form" method="POST" action="/logout" style="display: inline;">
+                <a href="/chat">대화</a>
+                <a href="/create-character">캐릭터 생성</a>
+                <form id="logout-form" method="POST" action="/logout">
+                  <a href="/"><%= user.UserID %></a>
                     <input type="hidden" name="authenticity_token" value="<%= authenticity_token %>">
-                    <button type="submit">Log Out</button>
+                    <button type="submit">로그아웃</button>
                   </form>
-                <a href="/"><%= user.UserID %></a>
               <% } else { %>
                 <!-- 로그인 안 되었을 때 -->
                 <a href="/login">Log in</a>

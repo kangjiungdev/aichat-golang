@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	anthropic "github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
@@ -90,16 +89,12 @@ func CreateChat(c buffalo.Context) error {
 	if err != nil {
 		fmt.Println("변환 에러:", err)
 	}
-	createat, err := time.Parse("2006-01-02", time.Now().Format("2006-01-02"))
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	chat := &models.Chat{
 		UserID:      user.ID,
 		CharacterID: characterID,
 		UserMessage: []string{},
 		AiMessage:   []string{},
-		CreatedAt:   createat,
 	}
 	if err := models.DB.Create(chat); err != nil {
 		fmt.Println(err)
@@ -110,7 +105,7 @@ func CreateChat(c buffalo.Context) error {
 }
 
 func DeleteChat(c buffalo.Context) error {
-	fmt.Println("delete request")
+	fmt.Println("삭제 리퀘스트")
 
 	user, err := LogIn(c)
 	if err != nil {
@@ -134,7 +129,7 @@ func DeleteChat(c buffalo.Context) error {
 		return c.Render(http.StatusInternalServerError, r.String("삭제 실패:", err))
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/success/delete?what=chat")
+	return c.Render(http.StatusNoContent, r.String("Delete successful"))
 }
 
 type DataForAI struct {
@@ -191,8 +186,6 @@ func ResponseOfAI(c buffalo.Context) error {
 	}
 
 	var previousConversation []Conversation
-	fmt.Println("user messages:", len(chat.UserMessage))
-	fmt.Println("ai messages:", len(chat.AiMessage))
 	for i := 0; i < len(chat.UserMessage); i++ {
 		previousConversation = append(previousConversation, Conversation{Role: "user", Content: chat.UserMessage[i]})
 		previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
@@ -206,7 +199,10 @@ func ResponseOfAI(c buffalo.Context) error {
 			fmt.Sprintf("이 대화에서 '%s'는 사용자(User)이며, 너는 '%s'라는 캐릭터다. 너는 이제부터 %s로서 대화해야 하며, 절대 이 역할을 벗어나지 마라.", userName, character.CharacterName, character.CharacterName),
 		)),
 		anthropic.NewUserMessage(anthropic.NewTextBlock(string(jsonBytes))),
-		anthropic.NewAssistantMessage(anthropic.NewTextBlock(character.FirstMsgCharacter)),
+	}
+
+	if character.FirstMsgCharacter != "" {
+		msg = append(msg, anthropic.NewAssistantMessage(anthropic.NewTextBlock(character.FirstMsgCharacter)))
 	}
 
 	if len(previousConversation) > 0 {

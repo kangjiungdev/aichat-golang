@@ -1,9 +1,15 @@
 create_table("chats") {
   t.Column("id", "int", {"primary": true, "auto_increment": true})
-  t.Column("user_id", "int", {"null": "false"})
-  t.Column("character_id", "int", {"null": "false"})
-  t.Column("user_message", "json", {"size": 1500, "null": "false"})
-  t.Column("ai_message", "json", {"size": 3000, "null": "false"})
-  t.Column("created_at", "date", {"null": "false"})
-  t.Column("updated_at", "timestamp", {"null": "true"})
+  t.Column("user_id", "int", {"null": false})
+  t.Column("character_id", "int", {"null": false})
+  t.Column("user_message", "json", {"null": false})
+  t.Column("ai_message", "json", {"null": false})
+  t.Column("created_at", "timestamp", {
+    "null": false,
+    "default_raw": "CURRENT_TIMESTAMP"
+  })
+  t.Column("updated_at", "timestamp", {
+    "null": false,
+    "default_raw": "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+  })
 }

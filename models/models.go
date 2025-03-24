@@ -52,6 +52,7 @@ type Character struct {
 	CharacterAssets      StringArray `json:"character_assets" form:"character-assets" db:"character_assets"`
 	CreatorComment       string      `json:"creator_comment" form:"creator-comment" db:"creator_comment"`
 	CreatedAt            time.Time   `json:"created_at" db:"created_at"`
+	UpdatedAt            time.Time   `json:"updated_at" db:"updated_at"`
 }
 
 func (c Character) TableName() string {
@@ -65,6 +66,7 @@ type Chat struct {
 	UserMessage StringArray `json:"user_message" form:"user_message" db:"user_message"`
 	AiMessage   StringArray `json:"ai_message" form:"ai_message" db:"ai_message"`
 	CreatedAt   time.Time   `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at" db:"updated_at"`
 }
 
 func (c Chat) TableName() string {

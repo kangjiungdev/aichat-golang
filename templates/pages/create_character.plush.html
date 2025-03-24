@@ -45,6 +45,7 @@
         <div> <!-- 캐릭터 이미지 -->
             <label for="character-assets">
                 <p><span class="required">*</span>캐릭터 에셋</p>
+                <span>이미지 권장 크기는 550.4px × 885px (약62.2:100)입니다.</span>
                 <%= f.FileTag({accept: "image/*", multiple: "true", name: "character-assets", id: "character-assets"}) %>
             </label>
         </div>

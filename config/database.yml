@@ -6,6 +6,9 @@ development:
   port: "3306"
   user: "root"
   password: {{envOr "DATABASE_PASSWORD" ""}}
+  options:
+    parseTime: true
+    loc: "Asia%2FSeoul"
 
 test:
   dialect: "mysql"

@@ -2,6 +2,7 @@
     <h1><%= title %> Page</h1>
     <%= for (character) in characters { %>
         <%= form({action: "/chat/"+(character.ID), method: "POST", class: "create-chat-form"}) { %>
+            <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="home-character-image">
             <button><%= character.CharacterName %></button>
     <% }} %>
 </div>
