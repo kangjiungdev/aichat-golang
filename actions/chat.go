@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -30,6 +31,13 @@ func ChatPage(c buffalo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 채팅 id 찾기 실패
 	}
 
+	character := &models.Character{}
+	err = models.DB.Where("id = ?", chat.CharacterID).First(character)
+	if err != nil {
+		fmt.Println("에러: ", err)
+		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 캐릭터 id 찾기 실패
+	}
+
 	if chat.UserID != user.ID {
 		return c.Redirect(http.StatusSeeOther, "/chat") // 다른 유저 채팅 접근 금지
 	}
@@ -37,6 +45,7 @@ func ChatPage(c buffalo.Context) error {
 	c.Set("title", "Chat")
 	c.Set("login", true)
 	c.Set("user", user)
+	c.Set("character", character)
 	c.Set("javascript", "pages/chat.js")
 
 	return c.Render(http.StatusOK, r.HTML("pages/chat.plush.html"))
@@ -109,6 +118,7 @@ func DeleteChat(c buffalo.Context) error {
 	}
 
 	chatID := c.Param("chat_id")
+
 	chat := &models.Chat{}
 
 	if err := models.DB.Find(chat, chatID); err != nil {
@@ -167,10 +177,10 @@ func ResponseOfAI(c buffalo.Context) error {
 	userMsg := c.Request().FormValue("chat-input")
 	dataforai := DataForAI{
 		MyName:          fmt.Sprintf("내 이름은 '%s'(이)다.", userName),
-		MyInfo:          fmt.Sprintf("내 객관적인 정보: %s", userInfo),
-		CharacterName:   fmt.Sprintf("네 이름은 '%s'(이)다.", character.CharacterName),
-		CharacterInfo:   fmt.Sprintf("네 객관적인 정보: %s", character.CharacterInfo),
-		CharacterGender: fmt.Sprintf("네 성별은 '%s'다.", character.CharacterGender),
+		MyInfo:          fmt.Sprintf("내 정보(사실 기반): %s", userInfo),
+		CharacterName:   fmt.Sprintf("너의 이름은 '%s'(이)다.", character.CharacterName),
+		CharacterInfo:   fmt.Sprintf("너의 설정 정보(사실 기반): %s", character.CharacterInfo),
+		CharacterGender: fmt.Sprintf("너의 성별은 '%s'다.", character.CharacterGender),
 		WorldView:       fmt.Sprintf("세계관 설정: %s", character.WorldView),
 	}
 
@@ -189,6 +199,12 @@ func ResponseOfAI(c buffalo.Context) error {
 	}
 
 	msg := []anthropic.MessageParam{
+		anthropic.NewUserMessage(anthropic.NewTextBlock(
+			"말이 아닌 비언어적 표현은 *로 감싸고, 말과 자연스럽게 동시에 일어나는 행동은 대사와 함께 쓸 수 있으며, 그 외 대부분의 표현은 *...다* 형태의 문장으로 작성해주세요. 예: *환한 미소를 지으며* 안녕하세요!, *당황한 표정을 짓는다*, *작은 손짓을 하며* 이쪽이야., *고개를 끄덕인다*",
+		)),
+		anthropic.NewUserMessage(anthropic.NewTextBlock(
+			fmt.Sprintf("이 대화에서 '%s'는 사용자(User)이며, 너는 '%s'라는 캐릭터다. 너는 이제부터 %s로서 대화해야 하며, 절대 이 역할을 벗어나지 마라.", userName, character.CharacterName, character.CharacterName),
+		)),
 		anthropic.NewUserMessage(anthropic.NewTextBlock(string(jsonBytes))),
 		anthropic.NewAssistantMessage(anthropic.NewTextBlock(character.FirstMsgCharacter)),
 	}
@@ -201,15 +217,13 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
 		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
-		MaxTokens: anthropic.F(int64(1024)),
+		MaxTokens: anthropic.F(int64(2048)),
 		Messages:  anthropic.F(msg),
 	})
 	if err != nil {
 		fmt.Println("API call failed", err)
 		return c.Render(http.StatusBadRequest, r.String("API call failed:", err))
 	}
-
-	fmt.Println(message.Content[0].Text)
 
 	chat.UserMessage = append(chat.UserMessage, userMsg)
 	chat.AiMessage = append(chat.AiMessage, message.Content[0].Text)
@@ -222,6 +236,25 @@ func ResponseOfAI(c buffalo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, r.String(message.Content[0].Text))
+}
+
+func GetAllMessage(c buffalo.Context) error {
+	defer c.Request().Body.Close()
+
+	bytes, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, r.String("읽기 실패", err))
+	}
+	chatID := string(bytes)
+
+	chat := &models.Chat{}
+
+	if err := models.DB.Find(chat, chatID); err != nil {
+		fmt.Println("Can't Find Chat:", err)
+		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다", err))
+	}
+
+	return c.Render(http.StatusSeeOther, r.JSON(chat))
 }
 
 func checkWho(previousConversation []Conversation) []anthropic.MessageParam {

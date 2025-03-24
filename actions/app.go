@@ -58,6 +58,7 @@ func App() *buffalo.App {
 		// Remove to disable this.
 		app.Use(csrf.New)
 		app.Middleware.Skip(csrf.New, DeleteChat)
+		app.Middleware.Skip(csrf.New, GetAllMessage)
 
 		// Wraps each request in a transaction.
 		//   c.Value("tx").(*pop.Connection)
@@ -81,6 +82,7 @@ func App() *buffalo.App {
 		app.POST("/chat/{character_id}", CreateChat)
 		app.DELETE("/chat/{chat_id}", DeleteChat)
 		app.POST("/ai-response", ResponseOfAI)
+		app.POST("/get-all-chat", GetAllMessage)
 
 		app.GET("/create-character", CreateCharacterPage)
 

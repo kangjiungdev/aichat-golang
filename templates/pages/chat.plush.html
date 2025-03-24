@@ -1,4 +1,11 @@
 <div>
+    <div id="chat-box">
+        <%= if (character.FirstMsgCharacter != "") { %>
+            <div class="ai-chat-block-div chat-block-div">
+                <p id="first-message"><%= character.FirstMsgCharacter %></p>
+            </div>
+        <% } %>
+    </div>
     <%= form({action: "/ai-response", method: "POST", id: "ai-req-form"}) { %>
         <label for="my-name-input">
             <p>이름</p>

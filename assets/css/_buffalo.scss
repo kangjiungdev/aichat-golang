@@ -1,134 +1,138 @@
-.container {
-  min-width: 320px;
+* {
+  outline: none;
 }
 
-header {
-  background-color: white;
-  border: 1px solid black;
-  padding: 10px 20px;
+body {
+  background-color: #343A40;
+  color: #ddd;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* 공통 컨테이너 */
+.container {
+  width: 90%;
+  max-width: 600px;
   box-sizing: border-box;
 }
 
-.logo {
-  img {
-    width: 80px;
-  }
+/* 채팅 박스 스타일 (길이 조정 안 함) */
+#chat-box {
+  width: 600px;
+  height: 400px; /* 기존 길이 유지 */
+  background-color: #343A40;
+  border-radius: 10px;
+  padding: 15px;
+  overflow-y: auto;
 }
 
-.titles {
-  h1 {
-    font-size: 30px;
-    font-weight: 300;
-    color: white;
-    margin-bottom: 13px;
-    margin-top: 5px;
-  }
-
-  h2 {
-    font-weight: 300;
-    font-size: 18px;
-    display: inline-block;
-    margin: 0;
-  }
-
-  a {
-    color: white;
-    text-decoration: underline;
-  }
-
-  i {
-    margin-right: 5px;
-    text-decoration: none;
-  }
-
-  .documentation {
-    margin-left: 28px;
-  }
+/* 입력 폼 스타일 */
+#chat-form {
+  width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
 }
 
-.subtitle {
+/* 입력 필드 스타일 */
+.chat-form-input, .chat-form-textarea {
+  width: 100%; /* 부모 요소 크기에 맞춤 */
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background-color: #333;
+  color: #ddd;
+  font-size: 16px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+/* 플레이스홀더 스타일 */
+.chat-form-input::placeholder, .chat-form-textarea::placeholder {
+  color: #888;
+}
+
+/* 버튼 스타일 */
+#chat-enter-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #444;
+  color: #ddd;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: background 0.2s;
+  box-sizing: border-box;
+}
+
+/* AI 대화 메시지 (하얀색) */
+.ai-conversation-chat {
   color: white;
-  margin: 0;
-  padding: 13px 0;
-  background-color: #2a3543;
-  margin-bottom: 20px;
-
-  h3 {
-    font-size: 22px;
-    font-weight: 400;
-    margin: 0;
-  }
 }
 
-table {
-  font-size: 14px;
-
-  &.table tbody tr td {
-    border-top: 0;
-    padding: 10px;
-  }
+/* AI 액션 메시지 (노란색) */
+.ai-action-chat {
+  color: #FFC200;
 }
 
-.foot {
-  text-align: right;
-  color: #c5c5c5;
-  font-weight: 300;
-
-  a {
-    color: #8b8b8b;
-    text-decoration: underline;
-  }
+/* 사용자 대화 메시지 (파란색) */
+.user-conversation-chat {
+  color: #7B86EB;
 }
 
-.centered {
-  text-align: center;
+/* 사용자 액션 메시지 (회색) */
+.user-action-chat {
+  color: #828384;
 }
 
-@media all and (max-width: 770px) {
-  .titles {
-    h1 {
-      font-size: 25px;
-      margin: 15px 0 5px 0;
-    }
-  }
+/* 각 채팅 블록 내부 텍스트 위치 조정 (반응형) */
+.chat-block-div {
+  margin-bottom: 1.2vw; /* 기존 2.5vw → 1.2vw로 줄여서 간격 좁힘 */
+  margin-left: 0.5vw; /* 기존 위치 유지 */
+  position: relative;
+  left: 0vw; /* 오른쪽 이동 없음 */
+  top: 0.6vh; /* 살짝 아래로 이동 */
+  text-align: left; /* 왼쪽 정렬 유지 */
 }
 
-@media all and (max-width: 640px) {
-  .titles {
-    h1 {
-      font-size: 23px;
-      margin: 15px 0 5px 0;
-    }
-
-    h2 {
-      font-size: 15px;
-    }
-
-    .documentation {
-      margin-left: 10px;
-    }
-  }
+.ai-chat-block-div {
+  margin-bottom: 2.2vw; /* 기존보다 살짝 더 여백 증가 */
 }
 
-@media all and (max-width: 530px) {
-  .titles {
-    h1 {
-      font-size: 20px;
-      margin: 5px 0;
-    }
+.ai-action-chat, .ai-conversation-chat {
+  display: block; /* 줄 바꿈 강제 적용 */
+  margin-bottom: 1vw; /* 간격 추가 */
+}
 
-    .documentation {
-      margin-left: 0px;
-      margin-top: 5px;
-      display: block;
-    }
-  }
+#delete-chat {
+  background-color: #444; /* 다크 그레이 배경 */
+  color: #fff; /* 흰색 텍스트 */
+  border: none;
+  border-radius: 0.4rem; /* 둥근 모서리 */
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 1rem; /* 글씨와 버튼 사이 간격 (반응형) */
+}
 
-  .logo {
-    padding: 0;
+#chat-enter-button {
+  background-color: #444; /* 기본 색상 */
+  cursor: default;
+  transition: background-color 0.2s ease;
+}
 
-    img {
-      width: 100%
-    }
-  }
+#chat-enter-button.active:hover {
+  background-color: #666666; /* 활성화 상태일 때만 색 변경 */
+  cursor: pointer;
 }
