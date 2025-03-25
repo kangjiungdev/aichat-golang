@@ -14,7 +14,7 @@
                 </div>
               </div>
               <p class="chat-preview">
-                <%= character.CharacterInfo %>
+                <%= character.CharacterOnelineInfo %>
               </p>
               <div class="chat-buttons">
                 <button>캐릭터 정보</button>
@@ -23,7 +23,7 @@
               </div>
               <div class="chat-footer">
                 <span><%= chat.UpdatedAt.Format("2006-01-02 15:04") %></span>
-                <span><%= user.Name %></span>
+                <span class="chat-footer-username" data-chat-id="<%= chat.ID %>"><%= user.Name %></span>
               </div>
             </div>
           </div>

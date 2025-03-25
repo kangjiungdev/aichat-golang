@@ -80,6 +80,7 @@ func App() *buffalo.App {
 		app.POST("/chat/{character_id}", CreateChat)
 		app.DELETE("/chat/{chat_id}", DeleteChat)
 		app.POST("/ai-response", ResponseOfAI)
+		app.POST("/delete-message/{chat_id}", DeleteMessage)
 		app.POST("/get-all-chat", GetAllMessage)
 
 		app.GET("/create-character", CreateCharacterPage)

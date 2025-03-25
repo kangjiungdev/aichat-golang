@@ -1,9 +1,32 @@
 <header id="nav-header">
     <nav id="nav">
         <div class="nav-inner">
-            <a href="/">Home</a>
             <%= if (login) { %>
-                <!-- 로그인 되었을 때 -->
+              <!-- 로그인 되었을 때 -->
+              <%= if (navBarType) { %>
+                <%= if (navBarType=="chat") { %>
+                  <div class="navbar-div1">
+                    <div class="navbar-div2">
+                      <button id="nav-character-info-button">
+                        <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="nav-chat-character-img">
+                        <div class="nav-infodiv">
+                          <div class="navbar-div3">
+                            <span><%= character.CharacterName %></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="navbar-chat-character-name-icon" viewBox="0 0 320 512">
+                              <path fill="currentColor" d="M285.5 273.5c4.7-4.7 4.7-12.3 0-17L129.5 100.5c-4.7-4.7-12.3-4.7-17 0s-4.7 12.3 0 17L259 256 112.5 394.5c-4.7 4.7-4.7 12.3 0 17s12.3 4.7 17 0l156-156z"/>
+                            </svg>                            
+                          </div>
+                          <div class="navbar-chat-user-id">
+                            <span>@<%= user.UserID %></span>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                  
+                <% } %>
+              <% } else { %>
+                <a href="/">Home</a>
                 <a href="/chat">대화</a>
                 <a href="/create-character">캐릭터 생성</a>
                 <form id="logout-form" method="POST" action="/logout">
@@ -11,6 +34,7 @@
                     <input type="hidden" name="authenticity_token" value="<%= authenticity_token %>">
                     <button type="submit">로그아웃</button>
                   </form>
+              <% } %>
               <% } else { %>
                 <!-- 로그인 안 되었을 때 -->
                 <a href="/login">Log in</a>

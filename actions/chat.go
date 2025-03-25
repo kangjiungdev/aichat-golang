@@ -42,10 +42,11 @@ func ChatPage(c buffalo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/chat") // 다른 유저 채팅 접근 금지
 	}
 
-	c.Set("title", "Chat")
+	c.Set("title", fmt.Sprintf("%s x %s", character.CharacterName, user.Name))
 	c.Set("login", true)
 	c.Set("user", user)
 	c.Set("character", character)
+	c.Set("navBarType", "chat")
 	c.Set("javascript", "pages/chat.js")
 
 	return c.Render(http.StatusOK, r.HTML("pages/chat.plush.html"))
@@ -136,6 +137,37 @@ func DeleteChat(c buffalo.Context) error {
 	return c.Render(http.StatusNoContent, nil)
 }
 
+func DeleteMessage(c buffalo.Context) error {
+
+	_, err := LogIn(c)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, r.String("권한 없음"))
+	}
+
+	chatID := c.Param("chat_id")
+	chat := &models.Chat{}
+
+	if err := models.DB.Find(chat, chatID); err != nil {
+		fmt.Println("Can't Find Chat:", err)
+		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다"))
+	}
+
+	if len(chat.UserMessage) > 0 {
+		chat.UserMessage = chat.UserMessage[:len(chat.UserMessage)-1]
+	}
+
+	if len(chat.AiMessage) > 0 {
+		chat.AiMessage = chat.AiMessage[:len(chat.AiMessage)-1]
+	}
+
+	if err = models.DB.Update(chat); err != nil {
+		fmt.Println("Update Failed:", err)
+		return c.Render(http.StatusInternalServerError, r.String("채팅 저장 실패"))
+	}
+
+	return c.Render(http.StatusNoContent, nil)
+}
+
 type DataForAI struct {
 	MyName          string `json:"my_name"`
 	MyInfo          string `json:"my_info"`
@@ -153,13 +185,18 @@ type Conversation struct {
 
 func ResponseOfAI(c buffalo.Context) error {
 
+	_, err := LogIn(c)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, r.String("권한 없음"))
+	}
+
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	client := anthropic.NewClient(
 		option.WithAPIKey(apiKey),
 	)
 	chatID := c.Request().FormValue("chat-id")
 	chat := &models.Chat{}
-	err := models.DB.Where("id = ?", chatID).First(chat)
+	err = models.DB.Where("id = ?", chatID).First(chat)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Render(http.StatusBadRequest, r.String(err.Error()))
@@ -197,7 +234,7 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	msg := []anthropic.MessageParam{
 		anthropic.NewUserMessage(anthropic.NewTextBlock(
-			"말이 아닌 비언어적 표현은 *로 감싸고, 말과 자연스럽게 동시에 일어나는 행동은 대사와 함께 쓸 수 있으며, 그 외 대부분의 표현은 *...다* 형태의 문장으로 작성해주세요. 예: *환한 미소를 지으며* 안녕하세요!, *당황한 표정을 짓는다*, *작은 손짓을 하며* 이쪽이야., *고개를 끄덕인다*",
+			"비언어적 표현들과 말을 최대한 자세히 작성해 주세요.(평균 300자 이상) 말이 아닌 비언어적 표현은 *로 감싸고, 말과 자연스럽게 동시에 일어나는 행동은 대사와 함께 쓸 수 있으며, 그 외 대부분의 표현은 *...다* 형태의 문장으로 작성해주세요. 예: *환한 미소를 지으며* 안녕하세요!, *당황한 표정을 짓는다*, *작은 손짓을 하며* 이쪽이야., *고개를 끄덕인다*",
 		)),
 		anthropic.NewUserMessage(anthropic.NewTextBlock(
 			fmt.Sprintf("이 대화에서 '%s'는 사용자(User)이며, 너는 '%s'라는 캐릭터다. 너는 이제부터 %s로서 대화해야 하며, 절대 이 역할을 벗어나지 마라.", userName, character.CharacterName, character.CharacterName),
@@ -217,7 +254,7 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
 		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
-		MaxTokens: anthropic.F(int64(2048)),
+		MaxTokens: anthropic.F(int64(4096)),
 		Messages:  anthropic.F(msg),
 	})
 	if err != nil {

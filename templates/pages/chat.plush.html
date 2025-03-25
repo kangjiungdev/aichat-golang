@@ -2,6 +2,7 @@
     <div class="left-img-div">
         <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="chat-character-image">
     </div>
+    <div class="right-div">
     <div id="chat-box">
         <%= if (character.FirstMsgCharacter != "") { %>
             <div class="ai-chat-block-div chat-block-div">
@@ -10,15 +11,22 @@
         <% } %>
     </div>
     <%= form({action: "/ai-response", method: "POST", id: "ai-req-form"}) { %>
-        <label for="my-name-input">
+        <label for="my-name-input" class="hidden">
             <p>이름</p>
             <%= f.InputTag({ name: "my-name-input", "type": "text", value: user.Name , "id": "my-name-input", "class": "chat-form-input", "placeholder": "캐릭터에게 내 이름을 알려주세요.", "autocomplete": "off" }) %>
         </label>
-        <label for="my-info-input">
+        <label for="my-info-input" class="hidden">
             <p>소개</p>
             <%= f.TextArea({ name: "my-info-input", "id": "my-info-input", "class": "chat-form-textarea", "placeholder": "캐릭터에게 나에 대해 알려주세요.", "autocomplete": "off" }) %>
         </label>
+        <div class="chat-input-row">
         <%= f.TextArea({ name: "chat-input", "id": "chat-input", "class": "chat-form-textarea", "placeholder": "대사를 입력하세요. 예) 안녕! 뭐해?", "autocomplete": "off" }) %>
-        <button>입력</button>
+        <button id="chat-enter-button">
+            <svg class="send-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="m22.1012 10.5616-19.34831-9.43824c-.1664-.08117-.34912-.12336-.53427-.12336-.67302 0-1.21862.5456-1.21862 1.21862v.03517c0 .16352.02005.32643.05971.48507l1.85597 7.42384c.05069.2028.22214.3526.42986.3757l8.15756.9064c.2829.0314.4969.2705.4969.5552s-.214.5238-.4969.5552l-8.15756.9064c-.20772.0231-.37917.1729-.42986.3757l-1.85597 7.4238c-.03966.1587-.05971.3216-.05971.4851v.0352c0 .673.5456 1.2186 1.21862 1.2186.18515 0 .36787-.0422.53427-.1234l19.34831-9.4382c.5499-.2682.8988-.8265.8988-1.4384s-.3489-1.1702-.8988-1.4384z"/>
+              </svg>
+        </button>
+        </div>
     <% } %>
+</div>
 </div>

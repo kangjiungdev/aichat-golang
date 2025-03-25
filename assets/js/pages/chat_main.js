@@ -1,10 +1,22 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 const deleteChatBtn = document.getElementsByClassName("delete-chat")
+const userName = document.querySelectorAll(".chat-footer-username")
+
+
+
+const userInfos = JSON.parse(localStorage.getItem("userInfos"))
+
+userName.forEach(element => {
+    chatID = element.dataset.chatId
+    if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+        element.innerText = userInfos[chatID].userName
+    }
+})
 
 
 if (deleteChatBtn.length > 0) {
     [...deleteChatBtn].forEach(element => {
-        element.addEventListener("click", async (event) => {
+        element.addEventListener("click", async event => {
             event.preventDefault();
             const chatID = element.value
             try {
