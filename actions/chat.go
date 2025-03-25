@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 
 	anthropic "github.com/anthropics/anthropic-sdk-go"
@@ -68,6 +69,10 @@ func ChatMainPage(c buffalo.Context) error {
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
 
+	sort.Slice(chats, func(i, j int) bool {
+		return chats[i].UpdatedAt.After(chats[j].UpdatedAt)
+	})
+
 	c.Set("title", "Chat")
 	c.Set("login", true)
 	c.Set("user", user)
@@ -105,11 +110,10 @@ func CreateChat(c buffalo.Context) error {
 }
 
 func DeleteChat(c buffalo.Context) error {
-	fmt.Println("삭제 리퀘스트")
 
 	user, err := LogIn(c)
 	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/login")
+		return c.Render(http.StatusBadRequest, r.String("권한 없음"))
 	}
 
 	chatID := c.Param("chat_id")
@@ -129,7 +133,7 @@ func DeleteChat(c buffalo.Context) error {
 		return c.Render(http.StatusInternalServerError, r.String("삭제 실패:", err))
 	}
 
-	return c.Render(http.StatusNoContent, r.String("Delete successful"))
+	return c.Render(http.StatusNoContent, nil)
 }
 
 type DataForAI struct {
