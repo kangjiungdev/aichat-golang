@@ -9,13 +9,10 @@ const firstMessageOfCharacter = document.getElementById("first-message")
 let isSubmitting = false
 
 document.addEventListener("DOMContentLoaded", async() => {
-    const userName = localStorage.getItem("user_name")
-    const userInfo = localStorage.getItem("user_info")
-    if(userName) {
-        userNameInput.value = userName
-    }
-    if(userInfo) {
-        userInfoInput.value = userInfo
+    const userInfos = JSON.parse(localStorage.getItem("userInfos"))
+    if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+        userNameInput.value = userInfos[chatID].userName
+        userInfoInput.value = userInfos[chatID].userInfo
     }
     try {
         const req = await fetch("/get-all-chat", {
@@ -84,8 +81,8 @@ if(firstMessageOfCharacter) {
     })
 }
 
-storageSetEvent(userNameInput, "user_name")
-storageSetEvent(userInfoInput, "user_info")
+storageSetEvent(userNameInput)
+storageSetEvent(userInfoInput)
 
 function createChatBlock(chatContents, who) {
     const chatBlock = document.createElement("div");
@@ -136,9 +133,14 @@ function actionChat(chatContents) {
     return txtArray
 }
 
-function storageSetEvent(element, key) {
+function storageSetEvent(element) {
     element.addEventListener("change", function() {
-        localStorage.setItem(key, this.value)
+        let userInfos = JSON.parse(localStorage.getItem("userInfos")) || {};
+        userInfos[chatID] = {
+            userName: userNameInput.value,
+            userInfo: userInfoInput.value
+        }
+        localStorage.setItem("userInfos", JSON.stringify(userInfos));
     })
 }
 

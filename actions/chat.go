@@ -218,7 +218,7 @@ func ResponseOfAI(c buffalo.Context) error {
 	})
 	if err != nil {
 		fmt.Println("API call failed", err)
-		return c.Render(http.StatusBadRequest, r.String("API call failed:", err))
+		return c.Render(http.StatusBadGateway, r.String("API call failed:", err))
 	}
 
 	chat.UserMessage = append(chat.UserMessage, userMsg)
@@ -237,6 +237,11 @@ func ResponseOfAI(c buffalo.Context) error {
 func GetAllMessage(c buffalo.Context) error {
 	defer c.Request().Body.Close()
 
+	user, err := LogIn(c)
+	if err != nil {
+		return c.Render(http.StatusBadRequest, r.String("로그인 안됨", err))
+	}
+
 	bytes, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		return c.Render(http.StatusBadRequest, r.String("읽기 실패", err))
@@ -245,9 +250,13 @@ func GetAllMessage(c buffalo.Context) error {
 
 	chat := &models.Chat{}
 
-	if err := models.DB.Find(chat, chatID); err != nil {
+	if err = models.DB.Find(chat, chatID); err != nil {
 		fmt.Println("Can't Find Chat:", err)
 		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다", err))
+	}
+
+	if chat.UserID != user.ID {
+		return c.Render(http.StatusForbidden, r.String("권한 없음"))
 	}
 
 	return c.Render(http.StatusSeeOther, r.JSON(chat))
