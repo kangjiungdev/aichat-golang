@@ -155,7 +155,7 @@ function actionChat(chatContents) {
 
 function createDeleteButton() {
     const allUserChat = chatBox.querySelectorAll(".chat-block-div")
-    if (allUserChat[0]) {
+    if (allUserChat[1]) {
         const lastUserChat = allUserChat[allUserChat.length - 2]
         const deleteButton = document.createElement("button")
         deleteButton.innerHTML = `

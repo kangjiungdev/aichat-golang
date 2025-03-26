@@ -42,10 +42,19 @@ func ChatPage(c buffalo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/chat") // 다른 유저 채팅 접근 금지
 	}
 
+	creator := &models.User{}
+
+	err = models.DB.Where("id = ?", chat.CharacterID).First(creator)
+	if err != nil {
+		fmt.Println("에러: ", err)
+		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 크리에이터 id 찾기 실패
+	}
+
 	c.Set("title", fmt.Sprintf("%s x %s", character.CharacterName, user.Name))
 	c.Set("login", true)
 	c.Set("user", user)
 	c.Set("character", character)
+	c.Set("characterCreator", creator)
 	c.Set("navBarType", "chat")
 	c.Set("javascript", "pages/chat.js")
 
