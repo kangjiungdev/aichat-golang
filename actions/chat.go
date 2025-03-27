@@ -21,7 +21,7 @@ func ChatPage(c buffalo.Context) error {
 	user, err := LogIn(c)
 	if err != nil {
 		fmt.Println(err)
-		c.Redirect(http.StatusSeeOther, "/login")
+		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 	chatID := c.Param("chat_id")
 
@@ -49,13 +49,9 @@ func ChatPage(c buffalo.Context) error {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 크리에이터 id 찾기 실패
 	}
-
-	firstMsg := strings.ReplaceAll(character.FirstMsgCharacter, "{{user}}", fmt.Sprintf("{{%s}}", user.Name))
-	firstMsg = strings.ReplaceAll(firstMsg, "{{char}}", character.CharacterName)
-	worldView := strings.ReplaceAll(character.WorldView, "{{user}}", fmt.Sprintf("{{%s}}", user.Name))
-	worldView = strings.ReplaceAll(worldView, "{{char}}", character.CharacterName)
-	characterInfo := strings.ReplaceAll(character.CharacterInfo, "{{user}}", fmt.Sprintf("{{%s}}", user.Name))
-	characterInfo = strings.ReplaceAll(characterInfo, "{{char}}", character.CharacterName)
+	firstMsg := replaceMessages(character.FirstMsgCharacter, user.Name, character.CharacterName)
+	worldView := replaceMessages(character.WorldView, user.Name, character.CharacterName)
+	characterInfo := replaceMessages(character.CharacterInfo, user.Name, character.CharacterName)
 
 	c.Set("title", fmt.Sprintf("%s x %s", character.CharacterName, user.Name))
 	c.Set("login", true)
@@ -75,7 +71,7 @@ func ChatMainPage(c buffalo.Context) error {
 	user, err := LogIn(c)
 	if err != nil {
 		fmt.Println(err)
-		c.Redirect(http.StatusSeeOther, "/login")
+		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 
 	var chats []models.Chat
@@ -107,12 +103,13 @@ func CreateChat(c buffalo.Context) error {
 	user, err := LogIn(c)
 	if err != nil {
 		fmt.Println(err)
-		c.Redirect(http.StatusSeeOther, "/login")
+		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 	characterStringID := c.Param("character_id")
 	characterID, err := strconv.Atoi(characterStringID)
 	if err != nil {
 		fmt.Println("변환 에러:", err)
+		return c.Render(http.StatusBadRequest, r.String("character_id 변환 실패"))
 	}
 
 	chat := &models.Chat{
@@ -150,7 +147,7 @@ func DeleteChat(c buffalo.Context) error {
 	}
 
 	if err := models.DB.Destroy(chat); err != nil {
-		return c.Render(http.StatusInternalServerError, r.String("삭제 실패:", err))
+		return c.Render(http.StatusInternalServerError, r.String("삭제 실패: "+err.Error()))
 	}
 
 	return c.Render(http.StatusNoContent, nil)
@@ -244,10 +241,8 @@ func ResponseOfAI(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.String("캐릭터 찾기 실패: "+err.Error()))
 	}
 
-	characterInfo := strings.ReplaceAll(character.CharacterInfo, "{{user}}", userName)
-	characterInfo = strings.ReplaceAll(characterInfo, "{{char}}", character.CharacterName)
-	worldView := strings.ReplaceAll(character.WorldView, "{{user}}", userName)
-	worldView = strings.ReplaceAll(worldView, "{{char}}", character.CharacterName)
+	worldView := replaceMessages(character.WorldView, userName, character.CharacterName)
+	characterInfo := replaceMessages(character.CharacterInfo, userName, character.CharacterName)
 
 	dataforai := DataForAI{
 		MyName:          fmt.Sprintf("내 이름은 '%s'(이)다.", userName),
@@ -272,7 +267,7 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	msg := []anthropic.MessageParam{
 		anthropic.NewUserMessage(anthropic.NewTextBlock(
-			"비언어적 표현들과 말을 최대한 자세히 작성해 주세요.(평균 300자 이상) 말이 아닌 비언어적 표현은 *로 감싸고, 말과 자연스럽게 동시에 일어나는 행동은 대사와 함께 쓸 수 있으며, 그 외 대부분의 표현은 *...다* 형태의 문장으로 작성해주세요. 예: *환한 미소를 지으며* 안녕하세요!, *당황한 표정을 짓는다*, *작은 손짓을 하며* 이쪽이야., *고개를 끄덕인다*",
+			"비언어적 표현과 말을 평균 300자 이상으로 최대한 자세히 작성해주세요. 비언어적 표현은 앞뒤에 * (별표 기호) 를 붙여 감싸며, 말과 자연스럽게 동시에 일어나는 행동은 대사와 함께 써주세요. 단독 행동은 *...다* 형태로 끝내주세요. 예: *환한 미소를 지으며* 안녕하세요!, *당황한 표정을 짓는다*, *작은 손짓을 하며* 이쪽이야., *고개를 끄덕인다*",
 		)),
 		anthropic.NewUserMessage(anthropic.NewTextBlock(
 			fmt.Sprintf("이 대화에서 '%s'는 사용자(User)이며, 너는 '%s'라는 캐릭터다. 너는 이제부터 %s로서 대화해야 하며, 절대 이 역할을 벗어나지 마라.", userName, character.CharacterName, character.CharacterName),
@@ -281,8 +276,7 @@ func ResponseOfAI(c buffalo.Context) error {
 	}
 
 	if character.FirstMsgCharacter != "" {
-		firstMsg := strings.ReplaceAll(character.FirstMsgCharacter, "{{user}}", userName)
-		firstMsg = strings.ReplaceAll(firstMsg, "{{char}}", character.CharacterName)
+		firstMsg := replaceMessages(character.FirstMsgCharacter, userName, character.CharacterName)
 		msg = append(msg, anthropic.NewAssistantMessage(anthropic.NewTextBlock(firstMsg)))
 	}
 
@@ -320,12 +314,12 @@ func GetAllMessage(c buffalo.Context) error {
 
 	user, err := LogIn(c)
 	if err != nil {
-		return c.Render(http.StatusBadRequest, r.String("로그인 안됨", err))
+		return c.Render(http.StatusBadRequest, r.String("로그인 안됨 "+err.Error()))
 	}
 
 	bytes, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		return c.Render(http.StatusBadRequest, r.String("읽기 실패", err))
+		return c.Render(http.StatusBadRequest, r.String("읽기 실패 "+err.Error()))
 	}
 	chatID := string(bytes)
 
@@ -333,14 +327,14 @@ func GetAllMessage(c buffalo.Context) error {
 
 	if err = models.DB.Find(chat, chatID); err != nil {
 		fmt.Println("Can't Find Chat:", err)
-		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다", err))
+		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다 "+err.Error()))
 	}
 
 	if chat.UserID != user.ID {
 		return c.Render(http.StatusForbidden, r.String("권한 없음"))
 	}
 
-	return c.Render(http.StatusSeeOther, r.JSON(chat))
+	return c.Render(http.StatusOK, r.JSON(chat))
 }
 
 func checkWho(previousConversation []Conversation) []anthropic.MessageParam {
@@ -353,4 +347,9 @@ func checkWho(previousConversation []Conversation) []anthropic.MessageParam {
 		}
 	}
 	return chat
+}
+
+func replaceMessages(s, userName, charName string) string {
+	s = strings.ReplaceAll(s, "{{user}}", fmt.Sprintf("{{%s}}", userName))
+	return strings.ReplaceAll(s, "{{char}}", charName)
 }
