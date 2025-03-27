@@ -42,7 +42,7 @@ func (u User) TableName() string {
 
 type Character struct {
 	ID                   int         `json:"id" db:"id"`
-	CreatorID            int         `json:"creator" db:"creator_id"`
+	CreatorID            int         `json:"creator_id" db:"creator_id"`
 	CharacterName        string      `json:"character_name" form:"character-name" db:"character_name"`
 	CharacterInfo        string      `json:"character_info" form:"character-info" db:"character_info"`
 	CharacterGender      string      `json:"character_gender" form:"character-gender" db:"character_gender"`

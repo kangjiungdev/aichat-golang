@@ -30,6 +30,10 @@
   background-color: #555;                 /* 호버 시 색상 */
 }
 
+textarea {
+  resize: none;
+}
+
 body {
   background-color: #343A40;
   color: #ddd;
@@ -51,6 +55,17 @@ body {
   padding-bottom: 0px;
   margin-bottom: 0px;
   box-sizing: border-box;
+}
+
+.blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(6px) brightness(0.7); /* 💥 흐림 효과 */
+  background-color: rgba(0, 0, 0, 0.2);       /* 어두운 반투명 */
+  z-index: 9998;
 }
 
 br {
@@ -104,7 +119,6 @@ br {
   background-color: #333;
   color: #ddd;
   font-size: 16px;
-  resize: none;
   box-sizing: border-box;
 }
 
@@ -123,7 +137,6 @@ br {
   background-color: #2D2D2D;
   border: none;
   color: rgb(209 213 219);
-  resize: none;
   outline: none;
   overflow-y: scroll; /* 스크롤은 동작함 */
   scrollbar-width: none;
@@ -203,6 +216,15 @@ br {
   transition: opacity 0.2s ease;
 }
 
+.navbar-chat-go-back svg {
+  width: 24px;
+  height: 24px;
+  margin-right: 15px;
+  stroke: white;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
 #delete-chat:hover {
   color: #fff;
 }
@@ -267,20 +289,22 @@ br {
 
 #nav {
   display: flex;
-  justify-content: center; /* 또는 space-evenly, space-between */
+  justify-content: center; /* nav 내부 콘텐츠를 가운데 정렬 */
   align-items: center;
-  width: 100%; /* 💥 중요! 전체 가로폭을 사용하게 함 */
+  width: 100%;
   background-color: #1F2327;
   height: 5vh;
   padding: 0 40px;
+  position: relative;
+  z-index: 10;
 }
 
 .nav-inner {
   display: flex;
   gap: 16px;
   align-items: center;
-  width: 100%; /* 💥 추가로 이 div도 퍼뜨릴 수 있음 */
-  justify-content: space-evenly; /* 요소들 균등 분배 */
+  width: 100%;
+  justify-content: space-evenly; /* 균등 분배 방식으로 복구 */
 }
 
 #nav a,
@@ -293,10 +317,10 @@ br {
   cursor: pointer;
 }
 
-#nav a:hover,
-#nav button:hover {
+#nav a:hover {
   text-decoration: underline;
 }
+
 
 #nav .navbar-div2 button:hover div,
 #nav .navbar-div2 button:hover span {
@@ -317,12 +341,13 @@ br {
   display: flex;
   align-items: center;
   height: 100%;
-  padding-left: 10px; /* 네브바 왼쪽 여백 */
+  padding-left: 14.5%; /* 네브바 왼쪽 여백 */
 }
 
 #nav .navbar-div2 {
   display: flex;
   align-items: center;
+  margin-right: 95vw;
   height: 100%;
 }
 
@@ -440,4 +465,95 @@ br {
   color: #aaa;
   display: flex;
   justify-content: space-between;
+}
+
+.character-popup {
+  position: fixed;          /* 화면 고정 */
+  top: 50%;                 /* 화면 위에서 50% */
+  left: 50%;                /* 화면 왼쪽에서 50% */
+  transform: translate(-50%, -50%); /* 정확히 가운데 정렬 */
+  z-index: 9999;            /* 가장 위로 */
+  background: #1e1e1e;      /* 배경 (필요시) */
+  padding: 24px;            /* 내부 여백 */
+  border-radius: 12px;      /* 모서리 둥글게 */
+  max-width: 1100px;
+  width: 100%;
+  max-height: 90vh;
+  will-change: transform;
+  overflow-y: auto;
+  box-shadow: 0 0 30px rgba(0,0,0,0.6);
+}
+
+
+.popup-container {
+  display: flex;
+  padding: 24px;
+}
+
+.popup-left {
+  width: 40%;
+  padding-right: 16px;
+}
+
+.popup-right {
+  width: 60%;
+}
+
+.character-image {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.character-meta {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.thumbnail-row {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  opacity: 0.6;
+  cursor: pointer;
+}
+.thumb.active {
+  opacity: 1;
+  border: 2px solid #fff;
+}
+
+.popup-footer {
+  border-top: 1px solid #444;
+  padding: 16px 24px;
+}
+
+.popup-footer label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.popup-footer p {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #ccc;
+}
+
+.input-box {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: #2a2a2a;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
 }

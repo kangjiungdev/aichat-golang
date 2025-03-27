@@ -7,6 +7,7 @@ const navCharacterInfoButton = document.getElementById("nav-character-info-butto
 const userNameInput = document.getElementById("my-name-input")
 const userInfoInput = document.getElementById("my-info-input")
 const firstMessageOfCharacter = document.getElementById("first-message")
+const chatCharacterImage = document.querySelector(".chat-character-image")
 let isSubmitting = false
 
 document.addEventListener("DOMContentLoaded", async() => {
@@ -14,7 +15,24 @@ document.addEventListener("DOMContentLoaded", async() => {
     if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
         userNameInput.value = userInfos[chatID].userName
         userInfoInput.value = userInfos[chatID].userInfo
+        chatCharacterImage.src = userInfos[chatID].characterImg
     }
+
+    const imgSrcWhenLoadErr = JSON.parse(chatCharacterImage.dataset.img)[0]
+
+    if (chatCharacterImage.complete) {
+        if (chatCharacterImage.naturalWidth === 0) {
+          console.error('로드 실패: 이미지가 없거나 깨졌음');
+          chatCharacterImage.src = `/${imgSrcWhenLoadErr}`
+        }
+      } else {
+        chatCharacterImage.addEventListener('error', () => {
+          console.error('로드 실패: 잘못된 URL이거나 이미지 없음');
+          chatCharacterImage.src = `/${imgSrcWhenLoadErr}`
+        });
+      }
+
+
     try {
         const req = await fetch("/get-all-chat", {
             method:"POST",
@@ -31,15 +49,132 @@ document.addEventListener("DOMContentLoaded", async() => {
         }
         createDeleteButton()
         scrollToBottom()
+
+        document.addEventListener("click", function (e) {
+            const popup = document.querySelector(".character-popup");
+            const button = navCharacterInfoButton;
+          
+            if (!popup) return;
+          
+            // 팝업 외부 && 버튼(전체 영역 포함) 외부 클릭 시 닫기
+            if (!popup.contains(e.target) && !button.contains(e.target)) {
+              popup.remove();
+              removeBlurOverlay()
+            }
+          });
     }
     catch (e) {
         console.error(e)
     }
 })
 
-navCharacterInfoButton.addEventListener("click", () => {
-    console.log("user info")
+navCharacterInfoButton.addEventListener("click", function() {
+    const imgsRoute = chatCharacterImage.dataset.img
+    const imgArray = JSON.parse(imgsRoute);
+    const characterInfo = document.querySelector(".nav-infodiv").dataset.characterInfo
+    const characterWorldView = document.querySelector(".navbar-div1").dataset.characterWorldView
+    const characterOnelineInfo = document.querySelector(".navbar-div2").dataset.characterOnelineInfo
+    const creatorUserID = document.querySelector(".navbar-chat-user-id span").dataset.creatorUserid
+    const characterInfoDiv = document.createElement("div")
+    characterInfoDiv.innerHTML = `
+    <div class="popup-container">
+    <!-- 좌측: 캐릭터 이미지 및 정보 -->
+    <div class="popup-left">
+      <div class="character-header">
+        <img src="${chatCharacterImage.src}" class="character-image" alt="캐릭터 이미지" style="width: 351.297px; height: 526.938px; object-fit: cover;">
+        <div class="character-meta">
+          <span class="creator">@${creatorUserID}</span>
+          <span class="views">8.1천</span>
+          <span class="likes">444</span>
+        </div>
+      </div>
+      
+      <!-- 썸네일 리스트 -->
+      <div class="thumbnail-row">
+        ${imgArray.map(element => {
+            return `<img src="/${element}" class="thumb">`;
+          }).join('')}
+      </div>
+
+
+      <div class="title">${characterOnelineInfo}</div>
+    </div>
+
+    <!-- 우측: 세계관 + 캐릭터 소개 -->
+    <div class="popup-right">
+      <div class="section">
+        <h3>세계관</h3>
+        <p>
+          ${convertText(characterWorldView)}
+        </p>
+      </div>
+
+      <div class="section">
+        <h3>캐릭터 소개</h3>
+        <p>
+          ${convertText(characterInfo)}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 하단: 내 정보 -->
+  <div class="popup-footer">
+    <h4>내 정보</h4>
+            <label for="popup-input-user-name">
+            <p>이름</p>
+            <input type="text" placeholder="캐릭터에게 내 이름을 알려주세요." id="popup-input-user-name" class="popup-input-user-name input-box" value="${userNameInput.value}">
+        </label>
+        <label for="popup-input-user-info">
+            <p>소개</p>
+            <textarea placeholder="캐릭터에게 나에 대해 알려주세요." id="popup-input-user-info" class="popup-input-user-info input-box">${userInfoInput.value}</textarea>
+        </label>
+  </div>
+    `
+    characterInfoDiv.classList.add("character-popup")
+    document.body.appendChild(characterInfoDiv)
+    const thumbImg = document.querySelectorAll(".thumb")
+    if(!document.querySelector(".active")) {
+        thumbImg.forEach(element => {
+            if(chatCharacterImage.src === element.src) {
+                element.classList.add("active")
+            }
+        })
+    }
+    characterInfoDiv.style.display = "block";
+    document.querySelector(".container").classList.add("blurred");
+    thumbImg.forEach(element => {
+        element.addEventListener("click", function() {
+            if(this.classList.contains("active")) {
+                return
+            }
+            const activeElement = document.querySelector(".active")
+            activeElement.classList.remove("active")
+            this.classList.add("active")
+            document.querySelector(".character-image").src = this.src
+            chatCharacterImage.src = this.src
+            let userInfos = JSON.parse(localStorage.getItem("userInfos")) || {};
+            userInfos[chatID] = {
+                userName: userNameInput.value,
+                userInfo: userInfoInput.value,
+                characterImg: this.src
+            }
+            localStorage.setItem("userInfos", JSON.stringify(userInfos));
+        })
+    })
+    document.querySelector(".popup-input-user-name").addEventListener("change", function() {
+        userNameInput.value = this.value
+        userNameInput.dispatchEvent(new Event('change'));
+    })
+    document.querySelector(".popup-input-user-info").addEventListener("change", function() {
+        userInfoInput.value = this.value
+        userInfoInput.dispatchEvent(new Event('change'));
+    })
+    showBlurOverlay()
 })
+
+
+
 
 aiReqForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -85,6 +220,9 @@ chatInput.addEventListener("keydown", event => {
 })
 
 if(firstMessageOfCharacter) {
+    const firstMsgConverted = convertText(firstMessageOfCharacter.innerText)
+    firstMessageOfCharacter.innerText = firstMsgConverted
+    
     const checkAction = actionChat(firstMessageOfCharacter.innerText)
     firstMessageOfCharacter.innerText = ""
     checkAction.forEach((object) => {
@@ -100,6 +238,8 @@ if(firstMessageOfCharacter) {
         firstMessageOfCharacter.appendChild(chatSpan)
     })
 }
+
+document.querySelector(".navbar-chat-go-back").addEventListener("click", () => { history.back() })
 
 storageSetEvent(userNameInput)
 storageSetEvent(userInfoInput)
@@ -133,6 +273,21 @@ function createChatBlock(chatContents, who) {
     chatBlock.appendChild(chat)
     chatBlock.classList.add("chat-block-div")
     chatBox.appendChild(chatBlock)
+}
+
+function convertText(text) {
+    const userInfos = JSON.parse(localStorage.getItem("userInfos"))
+    let textConverted;
+    if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+        const matches = [...text.matchAll(/{{(.*?)}}/g)];
+        const name = matches.map(m => m[1]);
+        textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
+    } else {
+        const matches = [...text.matchAll(/{{(.*?)}}/g)];
+        const name = matches.map(m => m[1]);
+        textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
+    }
+    return textConverted
 }
 
 function actionChat(chatContents) {
@@ -197,7 +352,8 @@ function storageSetEvent(element) {
         let userInfos = JSON.parse(localStorage.getItem("userInfos")) || {};
         userInfos[chatID] = {
             userName: userNameInput.value,
-            userInfo: userInfoInput.value
+            userInfo: userInfoInput.value,
+            characterImg: chatCharacterImage.src
         }
         localStorage.setItem("userInfos", JSON.stringify(userInfos));
     })
@@ -205,4 +361,20 @@ function storageSetEvent(element) {
 
 function scrollToBottom() {
     chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// blur 오버레이 추가
+function showBlurOverlay() {
+    const overlay = document.createElement("div");
+    overlay.classList.add("blur-overlay");
+    overlay.id = "blur-overlay";
+    document.body.appendChild(overlay);
+  }
+  
+  // 오버레이 제거
+function removeBlurOverlay() {
+    const existing = document.getElementById("blur-overlay");
+    if (existing) {
+      existing.remove();
+    }
 }

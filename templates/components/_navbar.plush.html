@@ -5,11 +5,14 @@
               <!-- 로그인 되었을 때 -->
               <%= if (navBarType) { %>
                 <%= if (navBarType=="chat") { %>
-                  <div class="navbar-div1">
-                    <div class="navbar-div2">
+                  <div class="navbar-div1" data-character-world-view="<%= worldView %>">
+                    <div class="navbar-chat-go-back">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg>
+                    </div>
+                    <div class="navbar-div2" data-character-oneline-info="<%= character.CharacterOnelineInfo %>">
                       <button id="nav-character-info-button">
                         <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="nav-chat-character-img">
-                        <div class="nav-infodiv">
+                        <div class="nav-infodiv" data-character-info="<%= characterInfo %>">
                           <div class="navbar-div3">
                             <span><%= character.CharacterName %></span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="navbar-chat-character-name-icon" viewBox="0 0 320 512">
@@ -17,7 +20,7 @@
                             </svg>                            
                           </div>
                           <div class="navbar-chat-user-id">
-                            <span>@<%= characterCreator.UserID %></span>
+                            <span data-creator-userid="<%= characterCreator.UserID %>">@<%= characterCreator.UserID %></span>
                           </div>
                         </div>
                       </button>

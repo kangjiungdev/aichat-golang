@@ -8,7 +8,7 @@
         </div>
         <div> <!-- 캐릭터 소개 -->
             <label for="character-info">
-                <p><span class="required">*</span>캐릭터 소개</p>
+                <p><span class="required">*</span>캐릭터 소개</p>내용에 {{char}} 또는 {{user}}를 입력하면 각각 캐릭터 이름과 대화 상대의 이름으로 대체됩니다.
                 <%= f.TextArea({name: "character-info", id: "character-info", maxlength: "1000", placeholder: "캐릭터 소개를 입력해 주세요."}) %>
             </label>
         </div>
@@ -32,13 +32,13 @@
         </div>
         <div> <!-- 세계관 설정 -->
             <label for="world-view">
-                <p>세계관</p>
+                <p>세계관</p> {{user}} {{char}} 사용 가능
                 <%= f.TextArea({name: "world-view", id: "world-view", maxlength: "1000", placeholder: "세계관을 입력해 주세요."}) %>
             </label>
         </div>
         <div> <!-- 첫 메시지 -->
             <label for="first-msg-character">
-                <p>첫 메시지</p>
+                <p>첫 메시지</p>문장 양 옆을 * 로 감싸면 상황 설명을 할 수 있습니다. ex) *한 남자가 다가와 말을 건다.* 혹시 {{user}}씨 아니세요?
                 <%= f.TextArea({name: "first-msg-character", id: "first-msg-character", maxlength: "500", placeholder: "캐릭터가 건넬 첫 인사말을 입력해 주세요."}) %>
             </label>
         </div>

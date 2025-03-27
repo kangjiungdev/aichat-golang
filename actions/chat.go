@@ -10,6 +10,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 
 	anthropic "github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
@@ -31,6 +32,10 @@ func ChatPage(c buffalo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 채팅 id 찾기 실패
 	}
 
+	if chat.UserID != user.ID {
+		return c.Redirect(http.StatusSeeOther, "/chat") // 다른 유저 채팅 접근 금지
+	}
+
 	character := &models.Character{}
 	err = models.DB.Where("id = ?", chat.CharacterID).First(character)
 	if err != nil {
@@ -38,23 +43,28 @@ func ChatPage(c buffalo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 캐릭터 id 찾기 실패
 	}
 
-	if chat.UserID != user.ID {
-		return c.Redirect(http.StatusSeeOther, "/chat") // 다른 유저 채팅 접근 금지
-	}
-
 	creator := &models.User{}
-
-	err = models.DB.Where("id = ?", chat.CharacterID).First(creator)
+	err = models.DB.Where("id = ?", character.CreatorID).First(creator)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 크리에이터 id 찾기 실패
 	}
+
+	firstMsg := strings.ReplaceAll(character.FirstMsgCharacter, "{{user}}", fmt.Sprintf("{{%s}}", user.Name))
+	firstMsg = strings.ReplaceAll(firstMsg, "{{char}}", character.CharacterName)
+	worldView := strings.ReplaceAll(character.WorldView, "{{user}}", fmt.Sprintf("{{%s}}", user.Name))
+	worldView = strings.ReplaceAll(worldView, "{{char}}", character.CharacterName)
+	characterInfo := strings.ReplaceAll(character.CharacterInfo, "{{user}}", fmt.Sprintf("{{%s}}", user.Name))
+	characterInfo = strings.ReplaceAll(characterInfo, "{{char}}", character.CharacterName)
 
 	c.Set("title", fmt.Sprintf("%s x %s", character.CharacterName, user.Name))
 	c.Set("login", true)
 	c.Set("user", user)
 	c.Set("character", character)
 	c.Set("characterCreator", creator)
+	c.Set("firstMsg", firstMsg)
+	c.Set("worldView", worldView)
+	c.Set("characterInfo", characterInfo)
 	c.Set("navBarType", "chat")
 	c.Set("javascript", "pages/chat.js")
 
@@ -194,45 +204,64 @@ type Conversation struct {
 
 func ResponseOfAI(c buffalo.Context) error {
 
-	_, err := LogIn(c)
+	user, err := LogIn(c)
 	if err != nil {
 		return c.Render(http.StatusBadRequest, r.String("권한 없음"))
-	}
-
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	client := anthropic.NewClient(
-		option.WithAPIKey(apiKey),
-	)
-	chatID := c.Request().FormValue("chat-id")
-	chat := &models.Chat{}
-	err = models.DB.Where("id = ?", chatID).First(chat)
-	if err != nil {
-		fmt.Println("에러: ", err)
-		return c.Render(http.StatusBadRequest, r.String(err.Error()))
-	}
-	character := &models.Character{}
-	err = models.DB.Where("id = ?", chat.CharacterID).First(character)
-	if err != nil {
-		fmt.Println("에러: ", err)
-		return c.Render(http.StatusBadRequest, r.String(err.Error()))
 	}
 
 	userName := c.Request().FormValue("my-name-input")
 	userInfo := c.Request().FormValue("my-info-input")
 	userMsg := c.Request().FormValue("chat-input")
+
+	if userMsg == "" || userName == "" {
+		return c.Render(http.StatusBadRequest, r.String("input 값 비었음"))
+	}
+
+	apiKey := os.Getenv("ANTHROPIC_API_KEY")
+
+	client := anthropic.NewClient(
+		option.WithAPIKey(apiKey),
+	)
+
+	chatID := c.Request().FormValue("chat-id")
+
+	chat := &models.Chat{}
+	err = models.DB.Where("id = ?", chatID).First(chat)
+
+	if err != nil {
+		fmt.Println("에러: ", err)
+		return c.Render(http.StatusBadRequest, r.String("채팅 찾기 실패: "+err.Error()))
+	}
+
+	if chat.UserID != user.ID {
+		return c.Render(http.StatusForbidden, r.String("다른 사용자의 채팅에 접근할 수 없습니다."))
+	}
+
+	character := &models.Character{}
+	err = models.DB.Where("id = ?", chat.CharacterID).First(character)
+	if err != nil {
+		fmt.Println("에러: ", err)
+		return c.Render(http.StatusBadRequest, r.String("캐릭터 찾기 실패: "+err.Error()))
+	}
+
+	characterInfo := strings.ReplaceAll(character.CharacterInfo, "{{user}}", userName)
+	characterInfo = strings.ReplaceAll(characterInfo, "{{char}}", character.CharacterName)
+	worldView := strings.ReplaceAll(character.WorldView, "{{user}}", userName)
+	worldView = strings.ReplaceAll(worldView, "{{char}}", character.CharacterName)
+
 	dataforai := DataForAI{
 		MyName:          fmt.Sprintf("내 이름은 '%s'(이)다.", userName),
-		MyInfo:          fmt.Sprintf("내 정보(사실 기반): %s", userInfo),
+		MyInfo:          fmt.Sprintf("내 정보(사실 기반): %s.", strings.TrimSuffix(userInfo, ".")),
 		CharacterName:   fmt.Sprintf("너의 이름은 '%s'(이)다.", character.CharacterName),
-		CharacterInfo:   fmt.Sprintf("너의 설정 정보(사실 기반): %s", character.CharacterInfo),
+		CharacterInfo:   fmt.Sprintf("너의 설정 정보(사실 기반): %s.", strings.TrimSuffix(characterInfo, ".")),
 		CharacterGender: fmt.Sprintf("너의 성별은 '%s'다.", character.CharacterGender),
-		WorldView:       fmt.Sprintf("세계관 설정: %s", character.WorldView),
+		WorldView:       fmt.Sprintf("세계관 설정: %s.", strings.TrimSuffix(worldView, ".")),
 	}
 
 	jsonBytes, err := json.Marshal(dataforai)
 	if err != nil {
 		fmt.Println("json 변환 실패", err)
-		return c.Render(http.StatusBadRequest, r.String("json 변환 실패: ", err))
+		return c.Render(http.StatusBadRequest, r.String("json 변환 실패: "+err.Error()))
 	}
 
 	var previousConversation []Conversation
@@ -252,7 +281,9 @@ func ResponseOfAI(c buffalo.Context) error {
 	}
 
 	if character.FirstMsgCharacter != "" {
-		msg = append(msg, anthropic.NewAssistantMessage(anthropic.NewTextBlock(character.FirstMsgCharacter)))
+		firstMsg := strings.ReplaceAll(character.FirstMsgCharacter, "{{user}}", userName)
+		firstMsg = strings.ReplaceAll(firstMsg, "{{char}}", character.CharacterName)
+		msg = append(msg, anthropic.NewAssistantMessage(anthropic.NewTextBlock(firstMsg)))
 	}
 
 	if len(previousConversation) > 0 {
@@ -268,7 +299,7 @@ func ResponseOfAI(c buffalo.Context) error {
 	})
 	if err != nil {
 		fmt.Println("API call failed", err)
-		return c.Render(http.StatusBadGateway, r.String("API call failed:", err))
+		return c.Render(http.StatusBadGateway, r.String("API call failed: "+err.Error()))
 	}
 
 	chat.UserMessage = append(chat.UserMessage, userMsg)
@@ -278,7 +309,7 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	if err != nil {
 		fmt.Println("DB Update Error", err)
-		return c.Render(http.StatusOK, r.String("DB Update Error", err))
+		return c.Render(http.StatusBadRequest, r.String("DB Update Error: "+err.Error()))
 	}
 
 	return c.Render(http.StatusOK, r.String(message.Content[0].Text))

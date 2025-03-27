@@ -4,7 +4,7 @@
       <%= for (character) in characters { %>
         <%= if (character.ID == chat.CharacterID) { %>
           <div class="chat-card">
-            <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="chat-img">
+            <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="chat-img" data-chat-id="<%= chat.ID %>" data-img='<%= toJSON(character.CharacterAssets) %>'>
             <div class="chat-body">
               <div class="chat-header">
                 <h4><%= character.CharacterName %></h4>
