@@ -1,0 +1,7 @@
+create_table("chat_summaries") {
+  t.Column("user_id", "int", {"null": "false"})
+  t.Column("chat_id", "int", {"null": "false"})
+  t.Column("summary", "text", {"null": "false"})
+  t.Column("created_at", "timestamp", {"null": "true"})
+  t.Column("updated_at", "timestamp", {"null": "true"})
+}

@@ -73,6 +73,19 @@ func (c Chat) TableName() string {
 	return "chats"
 }
 
+type ChatSummary struct {
+	ID        int        `db:"id" json:"id"`
+	UserID    int        `db:"user_id" json:"user_id"`
+	ChatID    int        `db:"chat_id" json:"chat_id"`
+	Summary   string     `db:"summary" json:"summary"`
+	CreatedAt *time.Time `db:"created_at" json:"created_at,omitempty"`
+	UpdatedAt *time.Time `db:"updated_at" json:"updated_at,omitempty"`
+}
+
+func (c ChatSummary) TableName() string {
+	return "chat_summaries"
+}
+
 // DB is a connection to your database to be used
 // throughout your application.
 var DB *pop.Connection

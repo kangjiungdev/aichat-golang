@@ -82,6 +82,14 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	msg := []anthropic.MessageParam{}
 
+	systemText := []anthropic.TextBlockParam{
+		anthropic.NewTextBlock(`비언어적 표현과 말을 평균 300자 이상으로 최대한 자세히 작성해주세요. 
+비언어적 표현은 앞뒤에 * (별표 기호)를 붙여 감싸며, 말과 자연스럽게 동시에 일어나는 행동은 대사와 함께 써주세요. 
+대사 없이 단독 행동은 *...다* 형태로 끝내주세요. 감정, 표정, 눈빛, 몸짓을 시각적·감각적으로 묘사해 주세요.`),
+		anthropic.NewTextBlock(fmt.Sprintf("이 대화에서 '%s'는 사용자(User)이며, 너는 '%s'라는 캐릭터다. 너는 이제부터 %s로서 대화해야 하며, 절대 이 역할을 벗어나지 마라.", userName, character.CharacterName, character.CharacterName)),
+		anthropic.NewTextBlock(string(jsonBytes)),
+	}
+
 	if character.FirstMsgCharacter != "" {
 		firstMsg := replaceMessages(character.FirstMsgCharacter, userName, character.CharacterName)
 		msg = append(msg, anthropic.NewAssistantMessage(anthropic.NewTextBlock(firstMsg)))
@@ -96,14 +104,8 @@ func ResponseOfAI(c buffalo.Context) error {
 	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
 		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
 		MaxTokens: anthropic.F(int64(4096)),
-		System: anthropic.F([]anthropic.TextBlockParam{
-			anthropic.NewTextBlock(`비언어적 표현과 말을 평균 300자 이상으로 최대한 자세히 작성해주세요. 
-비언어적 표현은 앞뒤에 * (별표 기호)를 붙여 감싸며, 말과 자연스럽게 동시에 일어나는 행동은 대사와 함께 써주세요. 
-대사 없이 단독 행동은 *...다* 형태로 끝내주세요. 감정, 표정, 눈빛, 몸짓을 시각적·감각적으로 묘사해 주세요.`),
-			anthropic.NewTextBlock(fmt.Sprintf("이 대화에서 '%s'는 사용자(User)이며, 너는 '%s'라는 캐릭터다. 너는 이제부터 %s로서 대화해야 하며, 절대 이 역할을 벗어나지 마라.", userName, character.CharacterName, character.CharacterName)),
-			anthropic.NewTextBlock(string(jsonBytes)),
-		}),
-		Messages: anthropic.F(msg),
+		System:    anthropic.F(systemText),
+		Messages:  anthropic.F(msg),
 	})
 	if err != nil {
 		fmt.Println("API call failed", err)
