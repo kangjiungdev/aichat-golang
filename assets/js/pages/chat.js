@@ -202,7 +202,7 @@ aiReqForm.addEventListener("submit", async (event) => {
             const res = await req.text()
             createChatBlock(res, "AI")
         } else {
-            createChatBlock("오류가 발생했습니다. 현재 AI가 응답할 수 없는 상태입니다. 잠시 후 다시 시도해 주세요..", "AI")
+            createChatBlock("오류가 발생했습니다. 현재 AI가 응답할 수 없는 상태입니다. 잠시 후 다시 시도해 주세요.", "AI")
         }
     }   catch (e) {
         console.error(e)

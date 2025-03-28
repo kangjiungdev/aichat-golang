@@ -74,12 +74,11 @@ func (c Chat) TableName() string {
 }
 
 type ChatSummary struct {
-	ID        int        `db:"id" json:"id"`
-	UserID    int        `db:"user_id" json:"user_id"`
-	ChatID    int        `db:"chat_id" json:"chat_id"`
-	Summary   string     `db:"summary" json:"summary"`
-	CreatedAt *time.Time `db:"created_at" json:"created_at,omitempty"`
-	UpdatedAt *time.Time `db:"updated_at" json:"updated_at,omitempty"`
+	ID        int    `db:"id" json:"id"`
+	UserID    int    `db:"user_id" json:"user_id"`
+	ChatID    int    `db:"chat_id" json:"chat_id"`
+	Summary   string `db:"summary" json:"summary"`
+	MessageID int    `db:"message_id" json:"message_id"`
 }
 
 func (c ChatSummary) TableName() string {

@@ -21,7 +21,7 @@ func ChatPage(c buffalo.Context) error {
 	chatID := c.Param("chat_id")
 
 	chat := &models.Chat{}
-	err = models.DB.Where("id = ?", chatID).First(chat)
+	err = models.DB.Find(chat, chatID)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 채팅 id 찾기 실패
@@ -32,14 +32,14 @@ func ChatPage(c buffalo.Context) error {
 	}
 
 	character := &models.Character{}
-	err = models.DB.Where("id = ?", chat.CharacterID).First(character)
+	err = models.DB.Find(character, chat.CharacterID)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 캐릭터 id 찾기 실패
 	}
 
 	creator := &models.User{}
-	err = models.DB.Where("id = ?", character.CreatorID).First(creator)
+	err = models.DB.Find(creator, character.CreatorID)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 크리에이터 id 찾기 실패

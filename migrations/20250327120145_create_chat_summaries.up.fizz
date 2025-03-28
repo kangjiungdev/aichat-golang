@@ -1,7 +1,9 @@
 create_table("chat_summaries") {
+  t.Column("id", "int", {"primary": true, "auto_increment": true})
   t.Column("user_id", "int", {"null": "false"})
   t.Column("chat_id", "int", {"null": "false"})
   t.Column("summary", "text", {"null": "false"})
-  t.Column("created_at", "timestamp", {"null": "true"})
+  t.Column("message_id", "int", {"null": "false"})
+  t.Column("created_at", "timestamp", {"null": "false", "default_raw": "CURRENT_TIMESTAMP"})
   t.Column("updated_at", "timestamp", {"null": "true"})
 }
