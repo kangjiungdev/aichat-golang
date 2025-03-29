@@ -1,20 +1,23 @@
 <div class="chat-grid">
   <%= for (chat) in chats { %>
-    <%= if (chat.UserID == user.ID) { %>
       <%= for (character) in characters { %>
         <%= if (character.ID == chat.CharacterID) { %>
           <div class="chat-card">
             <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="chat-img" data-chat-id="<%= chat.ID %>" data-img='<%= toJSON(character.CharacterAssets) %>'>
             <div class="chat-body">
               <div class="chat-header">
-                <h4><%= character.CharacterName %></h4>
+                <h4 class="chat-character-name"><%= character.CharacterName %></h4>
                 <div class="chat-icons">
                   <span>💬 <%= len(chat.UserMessage) %></span>
                   <span>🤍</span>
                 </div>
               </div>
-              <p class="chat-preview">
-                <%= character.CharacterOnelineInfo %>
+              <p class="chat-preview" style="font-size: 14px;" data-char-name="<%= character.CharacterName %>" data-user-name="<%= user.Name %>" data-chat-id="<%= chat.ID %>">
+                <%= if (len(chat.AiMessage) > 0) { %>
+                  <%= chat.AiMessage[len(chat.AiMessage) - 1] %>
+                <% } else { %>
+                  <%= character.FirstMsgCharacter %>
+                <% } %>
               </p>
               <div class="chat-buttons">
                 <button>캐릭터 정보</button>
@@ -30,5 +33,4 @@
         <% } %>
       <% } %>
     <% } %>
-  <% } %>
 </div>

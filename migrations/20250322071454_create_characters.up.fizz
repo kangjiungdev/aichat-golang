@@ -2,7 +2,7 @@ create_table("characters") {
   t.Column("id", "int", {"primary": true, "auto_increment": true})
   t.Column("creator_id", "int", {"null": "false"})
   t.Column("character_name", "string", {"size": 15, "null": "false"})
-  t.Column("character_info", "string", {"size": 500, "null": "false"})
+  t.Column("character_info", "string", {"size": 1000, "null": "false"})
   t.Column("character_gender", "string", {"size": 2, "null": "false"})
   t.Column("character_oneline_info", "string", {"size": 50, "null": "false"})
   t.Column("world_view", "string", {"size": 1000, "null": "true"})

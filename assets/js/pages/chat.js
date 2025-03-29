@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", async() => {
 navCharacterInfoButton.addEventListener("click", function() {
     const imgsRoute = chatCharacterImage.dataset.img
     const imgArray = JSON.parse(imgsRoute);
-    const characterInfo = document.querySelector(".nav-infodiv").dataset.characterInfo
+    const characterInfo = JSON.parse(document.querySelector(".nav-infodiv").dataset.characterInfo)
     const characterWorldView = document.querySelector(".navbar-div1").dataset.characterWorldView
     const characterOnelineInfo = document.querySelector(".navbar-div2").dataset.characterOnelineInfo
     const creatorUserID = document.querySelector(".navbar-chat-user-id span").dataset.creatorUserid
@@ -111,9 +111,7 @@ navCharacterInfoButton.addEventListener("click", function() {
 
       <div class="section">
         <h3>캐릭터 소개</h3>
-        <p>
-          ${convertText(characterInfo)}
-        </p>
+        <p style="white-space: pre-wrap;">${convertText(characterInfo)}</p>
       </div>
     </div>
   </div>
@@ -277,14 +275,12 @@ function createChatBlock(chatContents, who) {
 
 function convertText(text) {
     const userInfos = JSON.parse(localStorage.getItem("userInfos"))
+    const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
+    const name = matches.map(m => m[1]);
     if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
-        const matches = [...text.matchAll(/{{(.*?)}}/g)];
-        const name = matches.map(m => m[1]);
         textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
     } else {
-        const matches = [...text.matchAll(/{{(.*?)}}/g)];
-        const name = matches.map(m => m[1]);
         textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
     }
     return textConverted

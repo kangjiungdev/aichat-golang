@@ -2,6 +2,7 @@ package actions
 
 import (
 	"aichat_golang/models"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -47,6 +48,12 @@ func ChatPage(c buffalo.Context) error {
 	firstMsg := replaceMessages(character.FirstMsgCharacter, user.Name, character.CharacterName)
 	worldView := replaceMessages(character.WorldView, user.Name, character.CharacterName)
 	characterInfo := replaceMessages(character.CharacterInfo, user.Name, character.CharacterName)
+	escapedInfo, err := json.Marshal(characterInfo)
+
+	if err != nil {
+		fmt.Println("characterInfo JSON 변환 실패:", err)
+		escapedInfo = []byte(`""`)
+	}
 
 	c.Set("title", fmt.Sprintf("%s x %s", character.CharacterName, user.Name))
 	c.Set("login", true)
@@ -55,7 +62,7 @@ func ChatPage(c buffalo.Context) error {
 	c.Set("characterCreator", creator)
 	c.Set("firstMsg", firstMsg)
 	c.Set("worldView", worldView)
-	c.Set("characterInfo", characterInfo)
+	c.Set("characterInfo", string(escapedInfo))
 	c.Set("navBarType", "chat")
 	c.Set("javascript", "pages/chat.js")
 
@@ -70,7 +77,7 @@ func ChatMainPage(c buffalo.Context) error {
 	}
 
 	var chats []models.Chat
-	err = models.DB.All(&chats)
+	err = models.DB.Where("user_id = ?", user.ID).All(&chats)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
@@ -141,8 +148,22 @@ func DeleteChat(c buffalo.Context) error {
 		return c.Render(http.StatusForbidden, r.String("권한 없음"))
 	}
 
+	var chatSummary []models.ChatSummary
+
+	err = models.DB.Where("chat_id = ?", chatID).All(&chatSummary)
+	if err != nil {
+		fmt.Println("에러: ", err)
+		return c.Render(http.StatusBadRequest, r.String("Chat Summary 찾기 실패"))
+	}
+
 	if err := models.DB.Destroy(chat); err != nil {
 		return c.Render(http.StatusInternalServerError, r.String("삭제 실패: "+err.Error()))
+	}
+
+	for _, summary := range chatSummary {
+		if err := models.DB.Destroy(&summary); err != nil {
+			return c.Render(http.StatusInternalServerError, r.String("삭제 실패: "+err.Error()))
+		}
 	}
 
 	return c.Render(http.StatusNoContent, nil)
@@ -150,7 +171,7 @@ func DeleteChat(c buffalo.Context) error {
 
 func DeleteMessage(c buffalo.Context) error {
 
-	_, err := LogIn(c)
+	user, err := LogIn(c)
 	if err != nil {
 		return c.Render(http.StatusBadRequest, r.String("권한 없음"))
 	}
@@ -163,6 +184,10 @@ func DeleteMessage(c buffalo.Context) error {
 		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다"))
 	}
 
+	if user.ID != chat.UserID {
+		return c.Render(http.StatusBadRequest, r.String("권한 없음"))
+	}
+
 	if len(chat.UserMessage) > 0 {
 		chat.UserMessage = chat.UserMessage[:len(chat.UserMessage)-1]
 	}
@@ -171,9 +196,25 @@ func DeleteMessage(c buffalo.Context) error {
 		chat.AiMessage = chat.AiMessage[:len(chat.AiMessage)-1]
 	}
 
+	var chatSummary []models.ChatSummary
+
+	err = models.DB.Where("chat_id = ?", chatID).All(&chatSummary)
+	if err != nil {
+		fmt.Println("에러: ", err)
+		return c.Render(http.StatusBadRequest, r.String("Chat Summary 찾기 실패"))
+	}
+
 	if err = models.DB.Update(chat); err != nil {
 		fmt.Println("Update Failed:", err)
 		return c.Render(http.StatusInternalServerError, r.String("채팅 저장 실패"))
+	}
+
+	for _, summary := range chatSummary {
+		if summary.MessageID == len(chat.UserMessage) {
+			if err := models.DB.Destroy(&summary); err != nil {
+				return c.Render(http.StatusInternalServerError, r.String("Summary 삭제 실패"))
+			}
+		}
 	}
 
 	return c.Render(http.StatusNoContent, nil)

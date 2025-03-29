@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/google/uuid"
@@ -35,9 +36,9 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 	}
 
 	var gender string
-	if i := c.Request().FormValue("character-gender"); i == "male" {
+	if g := c.Request().FormValue("character-gender"); g == "male" {
 		gender = "남자"
-	} else if i == "female" {
+	} else if g == "female" {
 		gender = "여자"
 	} else {
 		gender = "기타"
@@ -53,6 +54,25 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 		FirstMsgCharacter:    c.Request().FormValue("first-msg-character"),
 		CreatorComment:       c.Request().FormValue("creator-comment"),
 		CreatedAt:            createat,
+	}
+
+	if err := validateLength(c, "캐릭터 이름", character.CharacterName, 15); err != nil {
+		return err
+	}
+	if err := validateLength(c, "캐릭터 소개", character.CharacterInfo, 1000); err != nil {
+		return err
+	}
+	if err := validateLength(c, "한 줄 소개", character.CharacterOnelineInfo, 50); err != nil {
+		return err
+	}
+	if err := validateLength(c, "세계관 설명", character.WorldView, 1000); err != nil {
+		return err
+	}
+	if err := validateLength(c, "첫 대사", character.FirstMsgCharacter, 500); err != nil {
+		return err
+	}
+	if err := validateLength(c, "창작자 코멘트", character.CreatorComment, 500); err != nil {
+		return err
 	}
 
 	dirname := "assets/images/character_img"
@@ -88,4 +108,12 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/success/create?what=character")
+}
+
+func validateLength(c buffalo.Context, fieldName, value string, max int) error {
+	if utf8.RuneCountInString(value) > max {
+		msg := fmt.Sprintf("%s은(는) %d자 이내여야 합니다.", fieldName, max)
+		return c.Render(http.StatusBadRequest, r.String(msg))
+	}
+	return nil
 }
