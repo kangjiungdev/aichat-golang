@@ -81,11 +81,14 @@ func ResponseOfAI(c buffalo.Context) error {
 	if err != nil {
 		fmt.Println(err)
 	}
+	var summary []anthropic.MessageParam
 	if len(chatSummary) > 0 {
 		if len(chat.UserMessage) >= chatSummary[len(chatSummary)-1].MessageID+14 {
-			var summary []anthropic.MessageParam
 
-			for i := 0; i < len(chat.UserMessage)-4; i++ {
+			start := chatSummary[len(chatSummary)-1].MessageID
+			end := len(chat.UserMessage) - 4
+
+			for i := start; i < end; i++ {
 				summary = append(summary, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.UserMessage[i])))
 				summary = append(summary, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.AiMessage[i])))
 			}
@@ -94,12 +97,7 @@ func ResponseOfAI(c buffalo.Context) error {
 				previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
 			}
 
-			message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
-				Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
-				MaxTokens: anthropic.F(int64(4096)),
-				System:    anthropic.F([]anthropic.TextBlockParam{anthropic.NewTextBlock("다음은 유저와 캐릭터 사이의 대화입니다. 이 대화의 중요한 내용을 간결하게 요약해 주세요. 요약에는 감정 변화, 관계 흐름, 세계관/설정 변화, 말투나 행동의 특징, 중요한 대사나 장면을 포함해야 합니다. 단, '요약:', '대화 요약:' 같은 제목이나 항목명은 출력하지 말고, 자연스러운 문장 형태로 본문 내용만 작성하세요.")}),
-				Messages:  anthropic.F(summary),
-			})
+			message, err := SendSummaryReqToAI(client, summary)
 			if err != nil {
 				fmt.Println("API call failed", err)
 				return c.Render(http.StatusInternalServerError, r.String("API call failed: "+err.Error()))
@@ -116,12 +114,8 @@ func ResponseOfAI(c buffalo.Context) error {
 				fmt.Println(err)
 				return c.Render(http.StatusInternalServerError, r.String(err.Error()))
 			}
-
-			fmt.Println(message.Content[0].Text)
-
 		}
 	} else if len(chatSummary) == 0 && len(chat.UserMessage) >= 14 {
-		var summary []anthropic.MessageParam
 
 		for i := 0; i < len(chat.UserMessage)-4; i++ {
 			summary = append(summary, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.UserMessage[i])))
@@ -132,12 +126,7 @@ func ResponseOfAI(c buffalo.Context) error {
 			previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
 		}
 
-		message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
-			Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
-			MaxTokens: anthropic.F(int64(4096)),
-			System:    anthropic.F([]anthropic.TextBlockParam{anthropic.NewTextBlock("다음은 유저와 캐릭터 사이의 대화입니다. 이 대화의 중요한 내용을 간결하게 요약해 주세요. 요약에는 감정 변화, 관계 흐름, 세계관/설정 변화, 말투나 행동의 특징, 중요한 대사나 장면을 포함해야 합니다. 단, '요약:', '대화 요약:' 같은 제목이나 항목명은 출력하지 말고, 자연스러운 문장 형태로 본문 내용만 작성하세요.")}),
-			Messages:  anthropic.F(summary),
-		})
+		message, err := SendSummaryReqToAI(client, summary)
 		if err != nil {
 			fmt.Println("API call failed", err)
 			return c.Render(http.StatusInternalServerError, r.String("API call failed: "+err.Error()))
@@ -154,8 +143,6 @@ func ResponseOfAI(c buffalo.Context) error {
 			fmt.Println(err)
 			return c.Render(http.StatusInternalServerError, r.String(err.Error()))
 		}
-
-		fmt.Println(message.Content[0].Text)
 
 	} else {
 		for i := 0; i < len(chat.UserMessage); i++ {
@@ -195,11 +182,11 @@ func ResponseOfAI(c buffalo.Context) error {
 			previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
 		}
 		msg = append(msg, anthropic.NewUserMessage(anthropic.NewTextBlock(fmt.Sprintf("대화 요약: %s", strings.Join(summary, " ")))))
-		msg = append(msg, checkWho(previousConversation)...)
+		msg = append(msg, CheckWho(previousConversation)...)
 	}
 
 	if len(previousConversation) > 0 && len(chatSummary) == 0 {
-		msg = append(msg, checkWho(previousConversation)...)
+		msg = append(msg, CheckWho(previousConversation)...)
 	}
 
 	msg = append(msg, anthropic.NewUserMessage(anthropic.NewTextBlock(userMsg)))
@@ -228,7 +215,7 @@ func ResponseOfAI(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.String(message.Content[0].Text))
 }
 
-func checkWho(previousConversation []Conversation) []anthropic.MessageParam {
+func CheckWho(previousConversation []Conversation) []anthropic.MessageParam {
 	var chat []anthropic.MessageParam
 	for _, conversation := range previousConversation {
 		if conversation.Role == "user" {
@@ -240,6 +227,12 @@ func checkWho(previousConversation []Conversation) []anthropic.MessageParam {
 	return chat
 }
 
-func SendMsgToAI() {
-
+func SendSummaryReqToAI(client *anthropic.Client, summary []anthropic.MessageParam) (*anthropic.Message, error) {
+	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
+		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
+		MaxTokens: anthropic.F(int64(4096)),
+		System:    anthropic.F([]anthropic.TextBlockParam{anthropic.NewTextBlock("다음은 유저와 캐릭터 사이의 대화입니다. 이 대화의 중요한 내용을 간결하게 요약해 주세요. 요약에는 감정 변화, 관계 흐름, 세계관/설정 변화, 말투나 행동의 특징, 중요한 대사나 장면을 포함해야 합니다. 단, '요약:', '대화 요약:' 같은 제목이나 항목명은 출력하지 말고, 자연스러운 문장 형태로 본문 내용만 작성하세요.")}),
+		Messages:  anthropic.F(summary),
+	})
+	return message, err
 }

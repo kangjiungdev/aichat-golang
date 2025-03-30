@@ -13,11 +13,11 @@
     <%= form({action: "/ai-response", method: "POST", id: "ai-req-form"}) { %>
         <label for="my-name-input" class="hidden">
             <p>이름</p>
-            <%= f.InputTag({ name: "my-name-input", "type": "text", value: user.Name , "id": "my-name-input", "class": "chat-form-input", "placeholder": "캐릭터에게 내 이름을 알려주세요.", "autocomplete": "off" }) %>
+            <%= f.InputTag({ name: "my-name-input", "type": "text", value: user.Name , "id": "my-name-input", "placeholder": "캐릭터에게 내 이름을 알려주세요." }) %>
         </label>
         <label for="my-info-input" class="hidden">
             <p>소개</p>
-            <%= f.TextArea({ name: "my-info-input", "id": "my-info-input", "class": "chat-form-textarea", "placeholder": "캐릭터에게 나에 대해 알려주세요.", "autocomplete": "off" }) %>
+            <%= f.TextArea({ name: "my-info-input", "id": "my-info-input", "placeholder": "캐릭터에게 나에 대해 알려주세요." }) %>
         </label>
         <div class="chat-input-row">
         <%= f.TextArea({ name: "chat-input", "id": "chat-input", "class": "chat-form-textarea", "placeholder": "대사를 입력하세요. 예) 안녕! 뭐해?", "autocomplete": "off" }) %>
