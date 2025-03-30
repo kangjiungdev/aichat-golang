@@ -317,7 +317,8 @@ br {
   cursor: pointer;
 }
 
-#nav a:hover {
+#nav a:hover,
+#nav #logout-btn:hover {
   text-decoration: underline;
 }
 
@@ -395,7 +396,6 @@ br {
   text-decoration: none !important;
   line-height: 16px;
 }
-
 
 .chat-grid {
   display: grid;
@@ -565,4 +565,9 @@ br {
 
 .chat-preview {
   margin: 0px;
+}
+
+.chat-main-span {
+  margin: 0px;
+  display: inline;
 }

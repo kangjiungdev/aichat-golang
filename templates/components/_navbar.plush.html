@@ -35,7 +35,7 @@
                 <form id="logout-form" method="POST" action="/logout">
                   <a href="/"><%= user.UserID %></a>
                     <input type="hidden" name="authenticity_token" value="<%= authenticity_token %>">
-                    <button type="submit">로그아웃</button>
+                    <button id="logout-btn" type="submit">로그아웃</button>
                   </form>
               <% } %>
               <% } else { %>

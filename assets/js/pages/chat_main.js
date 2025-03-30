@@ -96,7 +96,7 @@ function parseAndDisplay(element) {
         const slice = [...content].slice(0, remaining).join('');
         const span = document.createElement("span");
         span.innerText = slice + "...";
-        span.classList.add("chat-span");
+        span.classList.add("chat-main-span");
         span.classList.add(chunk.act ? "ai-action-chat" : "ai-conversation-chat");
         container.appendChild(span);
         break;
@@ -104,7 +104,7 @@ function parseAndDisplay(element) {
   
       const span = document.createElement("span");
       span.innerText = content;
-      span.classList.add("chat-span");
+      span.classList.add("chat-main-span");
       span.classList.add(chunk.act ? "ai-action-chat" : "ai-conversation-chat");
       container.appendChild(span);
       currentLength = nextLength;
