@@ -34,13 +34,12 @@ document.addEventListener("DOMContentLoaded", async() => {
 
 
     try {
-        const req = await fetch("/get-all-chat", {
+        const req = await fetch(`/get-all-chat/${chatID}`, {
             method:"POST",
             headers: {
                 "Content-Type": "text/plain",
                 "X-CSRF-Token": csrfToken
               },
-            body: chatID
         })
         const res = await req.json()
         for (let i=0; i < res.user_message.length; i++) {

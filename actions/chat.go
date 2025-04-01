@@ -4,7 +4,6 @@ import (
 	"aichat_golang/models"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"sort"
 	"strconv"
@@ -210,7 +209,7 @@ func DeleteMessage(c buffalo.Context) error {
 	}
 
 	for _, summary := range chatSummary {
-		if summary.MessageID == len(chat.UserMessage) {
+		if summary.MessageID == len(chat.UserMessage)-4 {
 			if err := models.DB.Destroy(&summary); err != nil {
 				return c.Render(http.StatusInternalServerError, r.String("Summary 삭제 실패"))
 			}
@@ -236,18 +235,13 @@ type Conversation struct {
 }
 
 func GetAllMessage(c buffalo.Context) error {
-	defer c.Request().Body.Close()
 
 	user, err := LogIn(c)
 	if err != nil {
 		return c.Render(http.StatusBadRequest, r.String("로그인 안됨 "+err.Error()))
 	}
 
-	bytes, err := io.ReadAll(c.Request().Body)
-	if err != nil {
-		return c.Render(http.StatusBadRequest, r.String("읽기 실패 "+err.Error()))
-	}
-	chatID := string(bytes)
+	chatID := c.Param("chat_id")
 
 	chat := &models.Chat{}
 

@@ -81,34 +81,37 @@ func ResponseOfAI(c buffalo.Context) error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	var summary []anthropic.MessageParam
+	var summaryMessages []anthropic.MessageParam
 	if len(chatSummary) > 0 {
-		if len(chat.UserMessage) >= chatSummary[len(chatSummary)-1].MessageID+14 {
+		if summaryMsgNumber := chatSummary[len(chatSummary)-1].MessageID; len(chat.UserMessage) >= summaryMsgNumber+14 {
+			// UserMessage 개수가 요약된 메시지 개수 +14개(최소 10개 요약 + 마지막 메시지 4개 남겨놓기) 이상일 때
 
-			start := chatSummary[len(chatSummary)-1].MessageID
+			start := summaryMsgNumber
 			end := len(chat.UserMessage) - 4
 
 			for i := start; i < end; i++ {
-				summary = append(summary, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.UserMessage[i])))
-				summary = append(summary, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.AiMessage[i])))
-			}
-			for i := len(chat.UserMessage) - 4; i < len(chat.UserMessage); i++ {
-				previousConversation = append(previousConversation, Conversation{Role: "user", Content: chat.UserMessage[i]})
-				previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
+				summaryMessages = append(summaryMessages, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.UserMessage[i])))
+				summaryMessages = append(summaryMessages, anthropic.NewAssistantMessage(anthropic.NewTextBlock(chat.AiMessage[i])))
 			}
 
-			message, err := SendSummaryReqToAI(client, summary)
+			message, err := SendSummaryReqToAI(client, summaryMessages)
 			if err != nil {
 				fmt.Println("API call failed", err)
 				return c.Render(http.StatusInternalServerError, r.String("API call failed: "+err.Error()))
+			}
+			if len(message.Content) == 0 {
+				fmt.Println("요약 응답 비어 있음: message.Content 길이 0")
+				return c.Render(http.StatusInternalServerError, r.String("요약 응답 비어 있음: message.Content 길이 0"))
 			}
 
 			saveSummary := &models.ChatSummary{
 				UserID:    user.ID,
 				ChatID:    chat.ID,
 				Summary:   message.Content[0].Text,
-				MessageID: len(chat.UserMessage),
+				MessageID: end,
 			}
+
+			chatSummary = append(chatSummary, *saveSummary)
 
 			if err = models.DB.Create(saveSummary); err != nil {
 				fmt.Println(err)
@@ -116,28 +119,35 @@ func ResponseOfAI(c buffalo.Context) error {
 			}
 		}
 	} else if len(chatSummary) == 0 && len(chat.UserMessage) >= 14 {
+		// chatSummary가 없지만 UserMessage 개수가 14개(최소 10개 요약 + 마지막 메시지 4개 남겨놓기) 이상일 때
 
-		for i := 0; i < len(chat.UserMessage)-4; i++ {
-			summary = append(summary, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.UserMessage[i])))
-			summary = append(summary, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.AiMessage[i])))
-		}
-		for i := len(chat.UserMessage) - 4; i < len(chat.UserMessage); i++ {
-			previousConversation = append(previousConversation, Conversation{Role: "user", Content: chat.UserMessage[i]})
-			previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
+		end := len(chat.UserMessage) - 4
+
+		for i := 0; i < end; i++ {
+			summaryMessages = append(summaryMessages, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.UserMessage[i])))
+			fmt.Println("User Message", chat.UserMessage[i])
+			fmt.Println("AI Message", chat.AiMessage[i])
+			summaryMessages = append(summaryMessages, anthropic.NewAssistantMessage(anthropic.NewTextBlock(chat.AiMessage[i])))
 		}
 
-		message, err := SendSummaryReqToAI(client, summary)
+		message, err := SendSummaryReqToAI(client, summaryMessages)
 		if err != nil {
 			fmt.Println("API call failed", err)
 			return c.Render(http.StatusInternalServerError, r.String("API call failed: "+err.Error()))
+		}
+		if len(message.Content) == 0 {
+			fmt.Println("요약 응답 비어 있음: message.Content 길이 0")
+			return c.Render(http.StatusInternalServerError, r.String("요약 응답 비어 있음: message.Content 길이 0"))
 		}
 
 		saveSummary := &models.ChatSummary{
 			UserID:    user.ID,
 			ChatID:    chat.ID,
 			Summary:   message.Content[0].Text,
-			MessageID: len(chat.UserMessage),
+			MessageID: end,
 		}
+
+		chatSummary = append(chatSummary, *saveSummary)
 
 		if err = models.DB.Create(saveSummary); err != nil {
 			fmt.Println(err)
@@ -145,6 +155,8 @@ func ResponseOfAI(c buffalo.Context) error {
 		}
 
 	} else {
+		// chatSummary가 없고 UserMessage 개수가 14개 미만일 때
+
 		for i := 0; i < len(chat.UserMessage); i++ {
 			previousConversation = append(previousConversation, Conversation{Role: "user", Content: chat.UserMessage[i]})
 			previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
@@ -173,15 +185,18 @@ func ResponseOfAI(c buffalo.Context) error {
 	}
 
 	if len(chatSummary) > 0 {
-		summary := []string{}
+		summaryTexts := []string{}
 		for i := 0; i < len(chatSummary); i++ {
-			summary = append(summary, chatSummary[i].Summary)
+			summaryTexts = append(summaryTexts, chatSummary[i].Summary)
 		}
-		for i := len(chat.UserMessage) - 4; i < len(chat.UserMessage); i++ {
+
+		start := chatSummary[len(chatSummary)-1].MessageID + 1
+
+		for i := start; i < len(chat.UserMessage); i++ {
 			previousConversation = append(previousConversation, Conversation{Role: "user", Content: chat.UserMessage[i]})
 			previousConversation = append(previousConversation, Conversation{Role: "ai", Content: chat.AiMessage[i]})
 		}
-		msg = append(msg, anthropic.NewUserMessage(anthropic.NewTextBlock(fmt.Sprintf("대화 요약: %s", strings.Join(summary, " ")))))
+		msg = append(msg, anthropic.NewUserMessage(anthropic.NewTextBlock(fmt.Sprintf("대화 요약: %s", strings.Join(summaryTexts, " ")))))
 		msg = append(msg, CheckWho(previousConversation)...)
 	}
 
@@ -193,10 +208,11 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
 		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
-		MaxTokens: anthropic.F(int64(4096)),
+		MaxTokens: anthropic.F(int64(3072)),
 		System:    anthropic.F(systemText),
 		Messages:  anthropic.F(msg),
 	})
+
 	if err != nil {
 		fmt.Println("API call failed", err)
 		return c.Render(http.StatusInternalServerError, r.String("API call failed: "+err.Error()))
@@ -227,12 +243,14 @@ func CheckWho(previousConversation []Conversation) []anthropic.MessageParam {
 	return chat
 }
 
-func SendSummaryReqToAI(client *anthropic.Client, summary []anthropic.MessageParam) (*anthropic.Message, error) {
+func SendSummaryReqToAI(client *anthropic.Client, summaryMessages []anthropic.MessageParam) (*anthropic.Message, error) {
+
 	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
 		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
-		MaxTokens: anthropic.F(int64(4096)),
+		MaxTokens: anthropic.F(int64(3072)),
 		System:    anthropic.F([]anthropic.TextBlockParam{anthropic.NewTextBlock("다음은 유저와 캐릭터 사이의 대화입니다. 이 대화의 중요한 내용을 간결하게 요약해 주세요. 요약에는 감정 변화, 관계 흐름, 세계관/설정 변화, 말투나 행동의 특징, 중요한 대사나 장면을 포함해야 합니다. 단, '요약:', '대화 요약:' 같은 제목이나 항목명은 출력하지 말고, 자연스러운 문장 형태로 본문 내용만 작성하세요.")}),
-		Messages:  anthropic.F(summary),
+		Messages:  anthropic.F([]anthropic.MessageParam{summaryMessages[0]}),
 	})
+
 	return message, err
 }
