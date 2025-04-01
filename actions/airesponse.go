@@ -81,12 +81,12 @@ func ResponseOfAI(c buffalo.Context) error {
 	if err != nil {
 		fmt.Println(err)
 	}
-	var summaryMessages []anthropic.MessageParam
+	summaryMessages := []anthropic.MessageParam{}
 	if len(chatSummary) > 0 {
 		if summaryMsgNumber := chatSummary[len(chatSummary)-1].MessageID; len(chat.UserMessage) >= summaryMsgNumber+14 {
 			// UserMessage 개수가 요약된 메시지 개수 +14개(최소 10개 요약 + 마지막 메시지 4개 남겨놓기) 이상일 때
 
-			start := summaryMsgNumber
+			start := summaryMsgNumber + 1
 			end := len(chat.UserMessage) - 4
 
 			for i := start; i < end; i++ {
