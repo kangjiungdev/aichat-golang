@@ -1,0 +1,127 @@
+#nav-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #1F2327; /* 어두운 톤 배경 */
+    padding: 10px 20px;
+    z-index: 1000; /* 맨 위로 */
+  }
+  
+  #nav {
+    display: flex;
+    justify-content: center; /* nav 내부 콘텐츠를 가운데 정렬 */
+    align-items: center;
+    width: 100%;
+    background-color: #1F2327;
+    height: 5vh;
+    padding: 0 40px;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .nav-inner {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    width: 100%;
+    justify-content: space-evenly; /* 균등 분배 방식으로 복구 */
+  }
+  
+  #nav a,
+  #nav button {
+    color: white;
+    text-decoration: none;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  #nav a:hover,
+  #nav #logout-btn:hover {
+    text-decoration: underline;
+  }
+  
+  
+  #nav .navbar-div2 button:hover div,
+  #nav .navbar-div2 button:hover span {
+    text-decoration-line: none !important;
+  }
+  
+  #nav .navbar-div3,
+  #nav .navbar-chat-user-id,
+  #nav .navbar-chat-user-id *,
+  #nav .navbar-div2 button *,
+  #nav .navbar-div2 button:hover *,
+  #nav .navbar-div2 button:focus *,
+  #nav .navbar-div2 button:active * {
+    text-decoration-line: none !important;
+  }
+  
+  #nav .navbar-div1 {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-left: 14.5%; /* 네브바 왼쪽 여백 */
+  }
+  
+  #nav .navbar-div2 {
+    display: flex;
+    align-items: center;
+    margin-right: 95vw;
+    height: 100%;
+  }
+  
+  #nav .navbar-div2 button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  
+  #nav .nav-chat-character-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  #nav .nav-infodiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    white-space: nowrap;
+  }
+  
+  #nav .navbar-div3 {
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    line-height: 1.2;
+    text-decoration: none !important;
+    margin-bottom: 0px; /* 👈 이름과 아이디 사이 거리 추가 */
+  }
+  
+  .navbar-chat-character-name-icon {
+    margin-bottom: 3px;
+    width: 20px;
+    height: 20px;
+    fill: white;
+  }
+  
+  #nav .navbar-chat-user-id {
+    padding: 0px 4px 0px 4px;
+    font-size: 12px;
+    color: #ccc;
+    background-color: #343A40;
+    border-radius: 9999px;
+    text-align: center;
+    text-decoration: none !important;
+    line-height: 16px;
+  }

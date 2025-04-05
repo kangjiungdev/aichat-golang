@@ -1,0 +1,29 @@
+#not-found-page {
+    width: 100vw;
+    height: 92.5vh;
+    display: flex;
+    flex-direction: column; /* 세로로 배치 */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-weight: 600;
+
+    h2 {
+        font-size: 36px;
+    }
+
+    p {
+        margin-top: 2vh; /* 'Go home'과의 간격을 주기 위해 */
+        font-size: 24px;
+
+        a {
+            color: $yellow;
+            text-decoration: none;
+            &:hover {
+                color: $yellow-hover;
+                text-decoration: underline;
+            }
+        }
+    }
+}

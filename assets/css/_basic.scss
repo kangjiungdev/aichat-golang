@@ -1,0 +1,65 @@
+/* 모든 브라우저에 적용되도록 기본 설정 */
+* {
+    scrollbar-width: thin;                  /* Firefox */
+    scrollbar-color: $gray-border #888;          /* Firefox thumb / track */
+    outline: none !important;
+  }
+  
+  input:focus,
+  textarea:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Chrome, Edge, Safari */
+  *::-webkit-scrollbar {
+    width: 20px;                             /* 스크롤바 너비 */
+  }
+  
+  *::-webkit-scrollbar-track {
+    background: #888;                    /* 트랙 색상 */
+    border-radius: 10px;
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    background-color: #444;                 /* 스크롤바 색상 */
+    border-radius: 10px;                    /* 둥글게 */
+    min-height: 100vh;
+    border: 2px solid $gray-border;              /* thumb과 track 사이 여백 느낌 */
+  }
+  
+  *::-webkit-scrollbar-thumb:hover {
+    min-height: 100vh;
+    background-color: $gray-border;                 /* 호버 시 색상 */
+  }
+  
+  body {
+    background-color: #343A40;
+    color: #ddd;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding-top: 4.62vh;
+    min-height: 100vh;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* 공통 컨테이너 */
+  .container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    margin: 0 auto;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    box-sizing: border-box;
+  }
+  
+  textarea {
+    resize: none;
+  }
+  
+  br {
+    display: none;
+  }

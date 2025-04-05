@@ -23,8 +23,8 @@ func CreateCharacterPage(c buffalo.Context) error {
 	c.Set("title", "Create Character")
 	c.Set("login", true)
 	c.Set("user", user)
-	c.Set("javascript", "pages/create_character.js")
-	return c.Render(http.StatusOK, r.HTML("pages/create_character.plush.html"))
+	c.Set("javascript", "pages/create-character.js")
+	return c.Render(http.StatusOK, r.HTML("pages/create-character.plush.html"))
 }
 
 func CreateCharacterOnDB(c buffalo.Context) error {

@@ -95,9 +95,9 @@ func ChatMainPage(c buffalo.Context) error {
 	c.Set("user", user)
 	c.Set("chats", &chats)
 	c.Set("characters", &characters)
-	c.Set("javascript", "pages/chat_main.js")
+	c.Set("javascript", "pages/chat-main.js")
 
-	return c.Render(http.StatusOK, r.HTML("pages/chat_main.plush.html"))
+	return c.Render(http.StatusOK, r.HTML("pages/chat-main.plush.html"))
 }
 
 func CreateChat(c buffalo.Context) error {
