@@ -13,7 +13,9 @@ function restrictInput($el, pattern) {
 function createErrorMessage(errMsg) {
   $("#error-msg").remove();
   const $msg = $("<p>").attr("id", "error-msg").text(errMsg);
-  $(".auth-bottom-link").before($msg);
+  const authBottomLink = $(".auth-bottom-link")
+  authBottomLink.before($msg);
+  authBottomLink.css("margin", "0.5rem")
 }
 
 // 입력 제한 적용

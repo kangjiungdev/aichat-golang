@@ -98,5 +98,5 @@ function createErrorMessage(errMsg) {
     .text(errMsg)
 
   $signUpForm.append($msg);
-  $signUpForm.css("padding-bottom", "0vh;")
+  $signUpForm.css("padding-bottom", "1.7vh");
 }
