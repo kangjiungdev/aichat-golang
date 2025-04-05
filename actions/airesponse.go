@@ -125,8 +125,6 @@ func ResponseOfAI(c buffalo.Context) error {
 
 		for i := 0; i < end; i++ {
 			summaryMessages = append(summaryMessages, anthropic.NewUserMessage(anthropic.NewTextBlock(chat.UserMessage[i])))
-			fmt.Println("User Message", chat.UserMessage[i])
-			fmt.Println("AI Message", chat.AiMessage[i])
 			summaryMessages = append(summaryMessages, anthropic.NewAssistantMessage(anthropic.NewTextBlock(chat.AiMessage[i])))
 		}
 
@@ -245,11 +243,17 @@ func CheckWho(previousConversation []Conversation) []anthropic.MessageParam {
 
 func SendSummaryReqToAI(client *anthropic.Client, summaryMessages []anthropic.MessageParam) (*anthropic.Message, error) {
 
+	for i, m := range summaryMessages {
+		fmt.Printf("summaryMessages[%d]: %+v\n", i, m)
+	}
+
+	// NewAssistantMessage로 MessageParm slice가 끝이나면 message.Content가 비어있음
+	summaryMessages = append(summaryMessages, anthropic.NewUserMessage(anthropic.NewTextBlock("위의 유저와 캐릭터 사이의 대화를 간결하게 요약해 주세요. 요약에는 감정 변화, 관계 흐름, 세계관/설정 변화, 말투나 행동의 특징, 중요한 대사나 장면을 포함해야 합니다. '요약:' 같은 제목은 생략하고, 자연스러운 문장으로 본문만 작성해 주세요.")))
+
 	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
 		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
 		MaxTokens: anthropic.F(int64(3072)),
-		System:    anthropic.F([]anthropic.TextBlockParam{anthropic.NewTextBlock("다음은 유저와 캐릭터 사이의 대화입니다. 이 대화의 중요한 내용을 간결하게 요약해 주세요. 요약에는 감정 변화, 관계 흐름, 세계관/설정 변화, 말투나 행동의 특징, 중요한 대사나 장면을 포함해야 합니다. 단, '요약:', '대화 요약:' 같은 제목이나 항목명은 출력하지 말고, 자연스러운 문장 형태로 본문 내용만 작성하세요.")}),
-		Messages:  anthropic.F([]anthropic.MessageParam{summaryMessages[0]}),
+		Messages:  anthropic.F(summaryMessages),
 	})
 
 	return message, err
