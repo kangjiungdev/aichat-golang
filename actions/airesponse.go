@@ -247,7 +247,7 @@ func SendSummaryReqToAI(client *anthropic.Client, summaryMessages []anthropic.Me
 		fmt.Printf("summaryMessages[%d]: %+v\n", i, m)
 	}
 
-	// NewAssistantMessage로 MessageParm slice가 끝이나면 message.Content가 비어있음
+	// NewAssistantMessage로 MessageParam slice가 끝나면 message.Content가 비어있음
 	summaryMessages = append(summaryMessages, anthropic.NewUserMessage(anthropic.NewTextBlock("위의 유저와 캐릭터 사이의 대화를 간결하게 요약해 주세요. 요약에는 감정 변화, 관계 흐름, 세계관/설정 변화, 말투나 행동의 특징, 중요한 대사나 장면을 포함해야 합니다. '요약:' 같은 제목은 생략하고, 자연스러운 문장으로 본문만 작성해 주세요.")))
 
 	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
