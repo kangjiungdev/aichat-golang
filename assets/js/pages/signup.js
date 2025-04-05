@@ -1,83 +1,102 @@
-const signUpForm = document.getElementById("signup-form")
-const phoneInput = document.getElementById("phone-number")
-const userIdInput = document.getElementById("user-id")
-const passwordInput = document.getElementById("password")
-const passwordCheckInput = document.getElementById("password-check")
-const nameInput = document.getElementById("name")
-const birthDateInput = document.getElementById("birth-date")
+const $signUpForm = $("#signup-form");
+const $phoneInput = $("#phone-number");
+const $userIdInput = $("#user-id");
+const $passwordInput = $("#password");
+const $passwordCheckInput = $("#password-check");
+const $nameInput = $("#name");
+const $birthDateInput = $("#birth-date");
 
+restrictInput($userIdInput, /\s|[^a-zA-Z0-9]/g);
+restrictInput($passwordInput, /\s|[^a-zA-Z0-9]/g);
+restrictInput($passwordCheckInput, /\s|[^a-zA-Z0-9]/g);
 
-restrictInput(userIdInput, /\s|[^a-zA-Z0-9]/g); 
-restrictInput(passwordInput, /\s|[^a-zA-Z0-9]/g);
-restrictInput(passwordCheckInput, /\s|[^a-zA-Z0-9]/g);
+$signUpForm.on("submit", async function (e) {
+  e.preventDefault();
 
-signUpForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!trimValue(nameInput) || !birthDateInput.value || !birthDateInput.checkValidity() || [...userIdInput.value].length < 6) {
-        return
-    }
-    if ([...passwordInput.value].length < 8 || [...passwordInput.value].length > 20) {
-      createErrorMessage("비밀번호는 8자~20자여야 합니다.")
-      return
-    }
-    if (passwordInput.value !== passwordCheckInput.value) {
-      createErrorMessage("비밀번호가 일치하지 않습니다.")
-      return
-    }
-    if ([...phoneInput.value].length !== 13) {
-      createErrorMessage("전화번호 형식이 올바르지 않습니다.")
-      return
-    }
-    nameInput.value = trimValue(nameInput)
-    const form = new FormData(signUpForm)
-    const res = await fetch("/signup", {method: "POST", body: form})
-    if (res.redirected) {
-        window.location.href = res.url;
-    } else if (!res.ok) {
-      const errorMsg = await res.text()
-      createErrorMessage(errorMsg)
-    }
-})
+  const userId = trimValue($userIdInput)
+  if (userId.length < 6 || userId.length > 15) {
+    createErrorMessage("아이디는 6자~15자여야 합니다.");
+    return;
+  }
 
-function trimValue(element) {
-    return element.value.trim()
-}
+  const pw = trimValue($passwordInput);
+  if (pw.length < 8 || pw.length > 20) {
+    createErrorMessage("비밀번호는 8자~20자여야 합니다.");
+    return;
+  }
+  if (pw !== $passwordCheckInput.val()) {
+    createErrorMessage("비밀번호가 일치하지 않습니다.");
+    return;
+  }
 
+  const name = trimValue($nameInput)
+  if(!name) {
+    createErrorMessage("이름을 입력해 주세요.");
+    return;
+  }
+  if (name.length > 15) {
+    createErrorMessage("이름은 15자 이하(좌우 공백 제외)여야 합니다.");
+    return;
+  }
 
-phoneInput.addEventListener("keydown", function (event) {
-  // 숫자, 백스페이스, Delete, 화살표 키 허용
-  if (!/[\d]/.test(event.key) && !["Backspace", "Delete", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-      event.preventDefault();
+  if (trimValue($phoneInput).length !== 13) {
+    createErrorMessage("전화번호 형식이 올바르지 않습니다.");
+    return;
+  }
+
+  if (!$birthDateInput.val() || !$birthDateInput[0].checkValidity()) {
+    createErrorMessage("생년월일 형식이 올바르지 않습니다.");
+    return;
+  }
+
+  $nameInput.val(trimValue($nameInput));
+
+  const form = new FormData($signUpForm[0]);
+  const res = await fetch("/signup", { method: "POST", body: form });
+
+  if (res.redirected) {
+    window.location.href = res.url;
+  } else if (!res.ok) {
+    const errorMsg = await res.text();
+    createErrorMessage(errorMsg);
   }
 });
 
-phoneInput.addEventListener("input", function () {
-  // 숫자만 남기기
-  let numbers = this.value.replace(/\D/g, '');
+$phoneInput.on("keydown", function (e) {
+  const key = e.key;
+  if (!/[\d]/.test(key) && !["Backspace", "Delete", "ArrowLeft", "ArrowRight"].includes(key)) {
+    e.preventDefault();
+  }
+});
 
-  // 자동 하이픈 추가
+$phoneInput.on("input", function () {
+  let numbers = $(this).val().replace(/\D/g, "");
+
   if (numbers.length <= 3) {
-      this.value = numbers;
+    $(this).val(numbers);
   } else if (numbers.length <= 7) {
-      this.value = numbers.slice(0, 3) + '-' + numbers.slice(3);
+    $(this).val(numbers.slice(0, 3) + "-" + numbers.slice(3));
   } else {
-      this.value = numbers.slice(0, 3) + '-' + numbers.slice(3, 7) + '-' + numbers.slice(7, 11);
+    $(this).val(numbers.slice(0, 3) + "-" + numbers.slice(3, 7) + "-" + numbers.slice(7, 11));
   }
 });
 
-function restrictInput(element, pattern) {
-  element.addEventListener("input", function () {
-      this.value = this.value.replace(pattern, "");
+function restrictInput($el, pattern) {
+  $el.on("input", function () {
+    $(this).val($(this).val().replace(pattern, ""));
   });
 }
 
+function trimValue($el) {
+  return $el.val().trim();
+}
+
 function createErrorMessage(errMsg) {
-  const errorMsgClass = document.getElementById("error-msg")
-  if (errorMsgClass) {
-    errorMsgClass.remove();
-  }
-  const msg = document.createElement("p")
-  msg.innerText = errMsg
-  msg.id = "error-msg"
-  signUpForm.appendChild(msg)
+  $("#error-msg").remove();
+  const $msg = $("<p>")
+    .attr("id", "error-msg")
+    .text(errMsg)
+
+  $signUpForm.append($msg);
+  $signUpForm.css("padding-bottom", "0vh;")
 }

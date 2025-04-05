@@ -47,6 +47,16 @@ func CreateAccountInDB(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.String("아이디는 영어와 숫자만 입력 가능합니다."))
 	}
 
+	if utf8.RuneCountInString(userId) < 6 || utf8.RuneCountInString(userId) > 15 {
+		fmt.Println("아이디는 6자~15자여야 합니다.")
+		return c.Render(http.StatusBadRequest, r.String("아이디는 6자~15자여야 합니다."))
+	}
+
+	if utf8.RuneCountInString(password) < 8 || utf8.RuneCountInString(password) > 20 {
+		fmt.Println("비밀번호는 8자~20자여야 합니다.")
+		return c.Render(http.StatusBadRequest, r.String("비밀번호는 8자~20자여야 합니다."))
+	}
+
 	// 전화번호 형식 검사
 	phoneRegex := regexp.MustCompile(`^\d{3}-\d{4}-\d{4}$`)
 	if !phoneRegex.MatchString(phoneNumber) {
@@ -54,14 +64,6 @@ func CreateAccountInDB(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.String("전화번호 형식이 올바르지 않습니다."))
 	}
 
-	if utf8.RuneCountInString(password) < 8 || utf8.RuneCountInString(password) > 20 {
-		fmt.Println("비밀번호는 8자~20자여야 합니다.")
-		return c.Render(http.StatusBadRequest, r.String("비밀번호는 8자~20자여야 합니다."))
-	}
-	if utf8.RuneCountInString(userId) < 6 || utf8.RuneCountInString(userId) > 15 {
-		fmt.Println("아이디는 6자~15자여야 합니다.")
-		return c.Render(http.StatusBadRequest, r.String("아이디는 6자~15자여야 합니다."))
-	}
 	existUser := &models.User{}
 	err := models.DB.Where("user_id = ?", userId).First(existUser)
 	if err == nil {

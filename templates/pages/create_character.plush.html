@@ -4,14 +4,14 @@
       <div> <!-- 캐릭터 이름 -->
         <label for="character-name">
           <p><span class="required">*</span>캐릭터 이름</p>
-          <%= f.InputTag({name: "character-name", id: "character-name", maxlength: "15", placeholder: "캐릭터 이름을 입력해 주세요.", "autocomplete": "off"}) %>
+          <%= f.InputTag({name: "character-name", id: "character-name", maxlength: "15", placeholder: "캐릭터 이름을 입력해 주세요."}) %>
         </label>
       </div>
   
       <div> <!-- 캐릭터 소개 -->
         <label for="character-info">
           <p><span class="required">*</span>캐릭터 소개</p>내용에 {{char}} 또는 {{user}}를 입력하면 각각 캐릭터 이름과 대화 상대의 이름으로 대체됩니다.
-          <%= f.TextArea({name: "character-info", id: "character-info", maxlength: "1000", placeholder: "캐릭터 소개를 입력해 주세요.", "autocomplete": "off"}) %>
+          <%= f.TextArea({name: "character-info", id: "character-info", maxlength: "1000", placeholder: "캐릭터 소개를 입력해 주세요."}) %>
         </label>
       </div>
   
@@ -36,7 +36,7 @@
       <div> <!-- 한줄 소개 -->
         <label for="character-oneline-info">
           <p><span class="required">*</span>한줄 소개</p>
-          <%= f.InputTag({name: "character-oneline-info", id: "character-oneline-info", maxlength: "50", placeholder: "캐릭터 및 세계관에 대한 간략한 소개를 입력해 주세요.", "autocomplete": "off"}) %>
+          <%= f.InputTag({name: "character-oneline-info", id: "character-oneline-info", maxlength: "50", placeholder: "캐릭터 및 세계관에 대한 간략한 소개를 입력해 주세요."}) %>
         </label>
       </div>
   

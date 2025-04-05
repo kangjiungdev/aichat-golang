@@ -1,48 +1,54 @@
-const logInForm = document.getElementById("login-form")
-const userIdInput = document.getElementById("user-id")
-const passwordInput = document.getElementById("password")
+const $logInForm = $("#login-form");
+const $userIdInput = $("#user-id");
+const $passwordInput = $("#password");
 
-
-restrictInput(userIdInput, /\s|[^a-zA-Z0-9]/g); 
-restrictInput(passwordInput, /\s|[^a-zA-Z0-9]/g);
-
-logInForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if ([...userIdInput.value].length < 6 || [...userIdInput.value].length > 15) {
-        createErrorMessage("아이디는 6자~15자여야 합니다.")
-        return
-    }
-    if ([...passwordInput.value].length < 8 || [...passwordInput.value].length > 20) {
-        createErrorMessage("비밀번호는 8자~20자여야 합니다.")
-        return
-    }
-    const form = new FormData(logInForm)
-    try{
-        const res = await fetch("/login", {method: "POST", body: form})
-        if (res.redirected) {
-            window.location.href = res.url
-        } else {
-            createErrorMessage(await res.text())
-        }
-    }
-    catch (e) {
-        console.log(e)
-    }
-})
-
-function restrictInput(element, pattern) {
-    element.addEventListener("input", function () {
-        this.value = this.value.replace(pattern, "");
-    });
+// 입력 제한 함수
+function restrictInput($el, pattern) {
+  $el.on("input", function () {
+    this.value = this.value.replace(pattern, "");
+  });
 }
 
+// 에러 메시지 출력
 function createErrorMessage(errMsg) {
-    const errorMsgClass = document.getElementById("error-msg")
-    if (errorMsgClass) {
-      errorMsgClass.remove();
-    }
-    const msg = document.createElement("p")
-    msg.innerText = errMsg
-    msg.id = "error-msg"
-    logInForm.appendChild(msg)
+  $("#error-msg").remove();
+  const $msg = $("<p>").attr("id", "error-msg").text(errMsg);
+  $(".auth-bottom-link").before($msg);
+}
+
+// 입력 제한 적용
+restrictInput($userIdInput, /\s|[^a-zA-Z0-9]/g);
+restrictInput($passwordInput, /\s|[^a-zA-Z0-9]/g);
+
+// 로그인 제출 처리
+$logInForm.on("submit", async function (e) {
+  e.preventDefault();
+
+  const userId = $userIdInput.val();
+  const password = $passwordInput.val();
+
+  if ([...userId].length < 6 || [...userId].length > 15) {
+    createErrorMessage("아이디는 6자~15자여야 합니다.");
+    return;
   }
+  if ([...password].length < 8 || [...password].length > 20) {
+    createErrorMessage("비밀번호는 8자~20자여야 합니다.");
+    return;
+  }
+
+  const formData = new FormData(this);
+
+  try {
+    const res = await fetch("/login", {
+      method: "POST",
+      body: formData
+    });
+    if (res.redirected) {
+      window.location.href = res.url;
+    } else {
+      createErrorMessage(await res.text());
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});

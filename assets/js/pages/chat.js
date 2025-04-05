@@ -1,6 +1,9 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
-const aiReqForm = document.getElementById("ai-req-form")
 const chatID = window.location.pathname.split("/")[2]
+let isSubmitting = false
+
+
+const aiReqForm = document.getElementById("ai-req-form")
 const chatBox = document.getElementById("chat-box")
 const chatInput = document.getElementById("chat-input")
 const navCharacterInfoButton = document.getElementById("nav-character-info-button")
@@ -8,9 +11,8 @@ const userNameInput = document.getElementById("my-name-input")
 const userInfoInput = document.getElementById("my-info-input")
 const firstMessageOfCharacter = document.getElementById("first-message")
 const chatCharacterImage = document.querySelector(".chat-character-image")
-let isSubmitting = false
 
-document.addEventListener("DOMContentLoaded", async() => {
+async function chatPageLoad() {
     const userInfos = JSON.parse(localStorage.getItem("userInfos"))
     if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
         userNameInput.value = userInfos[chatID].userName
@@ -64,8 +66,9 @@ document.addEventListener("DOMContentLoaded", async() => {
     }
     catch (e) {
         console.error(e)
-    }
-})
+    }}
+
+chatPageLoad()
 
 navCharacterInfoButton.addEventListener("click", function() {
     const imgsRoute = chatCharacterImage.dataset.img

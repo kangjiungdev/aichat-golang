@@ -99,10 +99,6 @@ func ResponseOfAI(c buffalo.Context) error {
 				fmt.Println("API call failed", err)
 				return c.Render(http.StatusInternalServerError, r.String("API call failed: "+err.Error()))
 			}
-			if len(message.Content) == 0 {
-				fmt.Println("요약 응답 비어 있음: message.Content 길이 0")
-				return c.Render(http.StatusInternalServerError, r.String("요약 응답 비어 있음: message.Content 길이 0"))
-			}
 
 			saveSummary := &models.ChatSummary{
 				UserID:    user.ID,
@@ -132,10 +128,6 @@ func ResponseOfAI(c buffalo.Context) error {
 		if err != nil {
 			fmt.Println("API call failed", err)
 			return c.Render(http.StatusInternalServerError, r.String("API call failed: "+err.Error()))
-		}
-		if len(message.Content) == 0 {
-			fmt.Println("요약 응답 비어 있음: message.Content 길이 0")
-			return c.Render(http.StatusInternalServerError, r.String("요약 응답 비어 있음: message.Content 길이 0"))
 		}
 
 		saveSummary := &models.ChatSummary{

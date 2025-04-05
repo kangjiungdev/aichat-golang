@@ -1,0 +1,101 @@
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  width: 100%;
+}
+
+.auth-form {
+  background-color: $gray-bg;
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 30vw;
+  margin: 3rem 0;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+  color: white;
+
+  &#login-form {
+    width: 23vw;
+    margin-top: 20vh;
+    padding-bottom: 1.7vh;
+  }
+
+  #error-msg {
+    margin-top: 5.5%;
+    color: #f87171;
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 1.5rem;
+
+    p {
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      color: $gray-text;
+    }
+  }
+
+  input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: $gray-input;
+    border: 1px solid $gray-border;
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+
+    &::placeholder {
+      color: #888;
+    }
+
+    &:focus {
+      color: white;
+      background-color: $gray-input;
+      border: 1px solid $gray-border;
+    }
+  }
+
+  #birth-date::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.85;
+    cursor: pointer;
+  }
+
+  button {
+    width: 100%;
+    padding: 0.9rem;
+    background-color: $yellow;
+    color: black;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 1rem;
+
+    &:hover {
+      background-color: $yellow-hover;
+    }
+  }
+
+  .auth-bottom-link {
+    margin: 1.3rem 0 0;
+    text-align: right;
+    font-size: 0.9rem;
+    color: $gray-text;
+
+    a {
+      color: $yellow;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

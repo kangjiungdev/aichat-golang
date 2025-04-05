@@ -1,69 +1,65 @@
-const createCharacterForm = document.getElementById("create-character-form")
-const createCharacterNameInput = document.getElementById("character-name")
-const createCharacterInfoInput = document.getElementById("character-info")
-const createCharacterOnelineInfo = document.getElementById("character-oneline-info")
-const createCharacterAssetsInput = document.getElementById("character-assets")
-const fileInput = document.getElementById("character-assets");
-const uploadBtn = document.querySelector(".upload-button")
-const fileName = document.getElementById("file-name");
+const $form = $("#create-character-form");
+const $name = $("#character-name");
+const $info = $("#character-info");
+const $oneline = $("#character-oneline-info");
+const $gender = $("input[name='character-gender']");
+const $assets = $("#character-assets");
+const $fileName = $("#file-name");
+const $uploadBtn = $(".upload-button");
 
+  // 폼 제출
+$form.on("submit", async function (e) {
+  e.preventDefault();
 
-createCharacterForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const createCharacterGender = document.querySelector('input[name="character-gender"]:checked');
-    if (!trimValue(createCharacterNameInput) || !trimValue(createCharacterInfoInput) || !trimValue(createCharacterOnelineInfo) || !createCharacterAssetsInput.files.length || !createCharacterGender) {
-        return
-    }
-    const form = new FormData(createCharacterForm)
-    const res = await fetch("/create-character", {method: "POST", body: form})
-    if (res.redirected) {
-        window.location.href = res.url;
-    }
-})
+  const genderChecked = $gender.filter(":checked").val();
+  if (
+    !$name.val().trim() ||
+    !$info.val().trim() ||
+    !$oneline.val().trim() ||
+    !$assets[0].files.length ||
+    !genderChecked
+  ) return;
 
-document.querySelectorAll(".gender-tab input[type='radio']").forEach((input) => {
-      input.addEventListener("change", () => {
-        document.querySelectorAll(".gender-tab").forEach((label) => {
-          label.classList.remove("gender-checked");
-        });
-        input.closest(".gender-tab").classList.add("gender-checked");
-      });
+  const formData = new FormData(this);
+  const res = await fetch("/create-character", { method: "POST", body: formData });
+  if (res.redirected) {
+    window.location.href = res.url;
+  }
 });
 
+  // 성별 선택
+$(".gender-tab input[type='radio']").on("change", function () {
+  $(".gender-tab").removeClass("gender-checked");
+  $(this).closest(".gender-tab").addClass("gender-checked");
+});
 
-fileInput.addEventListener("change", () => {
-  const files = Array.from(fileInput.files);
-  const maxChar = 60; // ✅ 버튼 안 뭉개지게 글자 수 제한
+  // 파일 선택
+$assets.on("change", function () {
+  const files = Array.from(this.files);
+  const maxChar = 60;
 
-  if (files.length === 0) {
-    fileName.textContent = "선택된 파일 없음";
+  if (!files.length) {
+    $fileName.text("선택된 파일 없음");
     return;
   }
 
   let names = files.map(f => f.name).join(", ");
-
   if (names.length > maxChar) {
     names = names.slice(0, maxChar - 10) + "...";
   }
 
-  fileName.textContent = `${names} (총 ${files.length}개)`;
+  $fileName.text(`${names} (총 ${files.length}개)`);
 });
 
-fileName.addEventListener("click", () => {
-  fileInput.click()
-})
+// 파일명 클릭 시 input 열기
+$fileName.on("click", () => $assets.click());
 
-setBtnColor(uploadBtn, "mouseover","#e6ad00")
-setBtnColor(fileName, "mouseover","#e6ad00")
-setBtnColor(uploadBtn, "mouseout", "#FFC200")
-setBtnColor(fileName, "mouseout", "#FFC200")
+// 버튼 hover 색상 설정
+const setBtnColor = (el, event, color) => {
+  el.on(event, () => $uploadBtn.css("background-color", color));
+};
 
-function setBtnColor(element, eventName, color) {
-  element.addEventListener(eventName, () => {
-    uploadBtn.style=`background-color: ${color}`
-  })
-}
-
-function trimValue(element) {
-    return element.value.trim()
-}
+setBtnColor($uploadBtn, "mouseover", "#e6ad00");
+setBtnColor($fileName, "mouseover", "#e6ad00");
+setBtnColor($uploadBtn, "mouseout", "#FFC200");
+setBtnColor($fileName, "mouseout", "#FFC200");
