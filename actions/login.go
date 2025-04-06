@@ -3,12 +3,12 @@ package actions
 import (
 	"aichat_golang/models"
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
 	"unicode/utf8"
 
 	"github.com/gobuffalo/buffalo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func LogInPage(c buffalo.Context) error {
@@ -51,8 +51,8 @@ func GetUserData(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.String("아이디 또는 비밀번호가 올바르지 않습니다.")) // DB에서 유저 찾기 실패
 	}
 
-	log.Println("유저 찾음:", user.UserID, user.Password)
-	if user.Password != password {
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Render(http.StatusBadRequest, r.String("아이디 또는 비밀번호가 올바르지 않습니다.")) // 비번 틀림
 	}

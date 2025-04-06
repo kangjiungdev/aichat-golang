@@ -1,7 +1,7 @@
 create_table("users") {
     t.Column("id", "int", {"primary": true, "auto_increment": true})
     t.Column("user_id", "string", {"size": 20, "unique": true, "null": "false"})
-    t.Column("password", "string", {"size": 20, "null": "false"})
+    t.Column("password", "string", {"size": 60, "null": "false"})
     t.Column("name", "string", {"size": 15, "null": "false"})
     t.Column("phone_number", "string", {"size": 13, "null": "false"})
     t.Column("birth_date", "date", {"null": "false"})

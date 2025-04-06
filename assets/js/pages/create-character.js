@@ -52,7 +52,7 @@ $assets.on("change", function () {
 });
 
 // 파일명 클릭 시 input 열기
-$fileName.on("click", () => $assets.click());
+$fileName.on("click", () => $uploadBtn.trigger("click"));
 
 // 버튼 hover 색상 설정
 const setBtnColor = (el, event, color) => {

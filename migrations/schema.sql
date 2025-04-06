@@ -101,7 +101,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` varchar(20) NOT NULL,
-  `password` varchar(20) NOT NULL,
+  `password` varchar(60) NOT NULL,
   `name` varchar(15) NOT NULL,
   `phone_number` varchar(13) NOT NULL,
   `birth_date` date NOT NULL,
@@ -120,4 +120,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-31 15:00:01
+-- Dump completed on 2025-04-07  5:38:46
