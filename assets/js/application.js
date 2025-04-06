@@ -5,8 +5,6 @@ require("jquery-ujs/src/rails.js");
 
 $("input, textarea").attr("autocomplete", "off");
 
-$(function () {
-    $("input[type='password']").on("paste copy cut", function (e) {
-      e.preventDefault();
-    });
+$("input[type='password']").on("paste copy cut", function (e) {
+  e.preventDefault();
 });
