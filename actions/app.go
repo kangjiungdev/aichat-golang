@@ -57,6 +57,7 @@ func App() *buffalo.App {
 		// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
 		// Remove to disable this.
 		app.Use(csrf.New)
+		app.Middleware.Skip(csrf.New, LogOut)
 
 		// Wraps each request in a transaction.
 		//   c.Value("tx").(*pop.Connection)
@@ -89,7 +90,9 @@ func App() *buffalo.App {
 
 		app.GET("/success/{act}", Success)
 
-		app.ErrorHandlers[404] = PageNotFound
+		app.ErrorHandlers[404] = func(status int, err error, c buffalo.Context) error {
+			return PageNotFound(status, err, c)
+		}
 
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	})

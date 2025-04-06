@@ -32,11 +32,10 @@
                 <a href="/">Home</a>
                 <a href="/chat">대화</a>
                 <a href="/create-character">캐릭터 생성</a>
-                <form id="logout-form" method="POST" action="/logout">
+                <%= form({id: "logout-form", method: "POST", action: "/logout"}) { %>
                   <a href="/"><%= user.UserID %></a>
-                    <input type="hidden" name="authenticity_token" value="<%= authenticity_token %>">
                     <button id="logout-btn" type="submit">로그아웃</button>
-                  </form>
+                <% } %>
               <% } %>
               <% } else { %>
                 <!-- 로그인 안 되었을 때 -->
