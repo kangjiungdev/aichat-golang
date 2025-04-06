@@ -14,8 +14,6 @@ func PageNotFound(status int, _ error, c buffalo.Context) error {
 		c.Set("user", user)
 	}
 
-	// 템플릿에 CSRF 토큰 전달
-	c.Set("authenticity_token", "")
 	c.Set("title", "404 - Page Not Found")
 
 	// 404 페이지 렌더링
