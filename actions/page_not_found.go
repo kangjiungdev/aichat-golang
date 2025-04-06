@@ -1,8 +1,6 @@
 package actions
 
 import (
-	"fmt"
-
 	"github.com/gobuffalo/buffalo"
 )
 
@@ -15,9 +13,6 @@ func PageNotFound(status int, _ error, c buffalo.Context) error {
 		c.Set("login", true)
 		c.Set("user", user)
 	}
-	token, _ := c.Value("authenticity_token").(string)
-
-	fmt.Println("token:", token)
 
 	// 템플릿에 CSRF 토큰 전달
 	c.Set("authenticity_token", "")

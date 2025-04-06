@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <%= if(authenticity_token != "") { %>
       <meta name="csrf-token" content="<%= authenticity_token %>">
+    <% } %>
     <meta charset="utf-8">
     <title><%= title %> | AI Chat</title>
     <%= stylesheetTag("application.css") %>
