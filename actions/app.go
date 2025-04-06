@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 
@@ -92,9 +91,6 @@ func App() *buffalo.App {
 		app.GET("/success/{act}", Success)
 
 		app.ErrorHandlers[404] = func(status int, err error, c buffalo.Context) error {
-			token := c.Value("authenticity_token")
-			fmt.Println(token)
-			c.Set("authenticity_token", token)
 			return PageNotFound(status, err, c)
 		}
 

@@ -2,6 +2,7 @@ package actions
 
 import (
 	"aichat_golang/models"
+	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
@@ -18,6 +19,11 @@ func HomeHandler(c buffalo.Context) error {
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
+
+	token := c.Value("authenticity_token")
+
+	fmt.Println(token)
+
 	c.Set("title", "Home")
 	c.Set("characters", characters)
 	c.Set("javascript", "pages/index.js")
