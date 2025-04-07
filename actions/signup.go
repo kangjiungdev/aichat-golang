@@ -84,19 +84,19 @@ func CreateAccountInDB(c buffalo.Context) error {
 	existUser := &models.User{}
 	err = tx.Where("user_id = ?", signupForm.UserId).First(existUser)
 	if err == nil {
-		return c.Render(http.StatusBadRequest, r.String("해당 아이디를 가진 유저가 이미 존재합니다."))
+		return c.Render(http.StatusConflict, r.String("해당 아이디를 가진 유저가 이미 존재합니다."))
 	}
 
 	createat, err := time.Parse("2006-01-02", time.Now().Format("2006-01-02"))
 	if err != nil {
 		fmt.Println(err)
-		return c.Render(http.StatusBadRequest, r.String("현재 날짜를 가져올 수 없습니다: "+err.Error()))
+		return c.Render(http.StatusInternalServerError, r.String("현재 날짜를 가져올 수 없습니다: "+err.Error()))
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(signupForm.Password), bcrypt.DefaultCost)
 	if err != nil {
 		fmt.Println(err)
-		return c.Render(http.StatusBadRequest, r.String("비밀번호 해시 실패: "+err.Error()))
+		return c.Render(http.StatusInternalServerError, r.String("비밀번호 해시 실패: "+err.Error()))
 	}
 
 	user := &models.User{

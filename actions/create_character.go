@@ -46,16 +46,13 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 	}
 
 	character := &models.Character{
-		CreatorID:            user.ID,
-		CharacterName:        c.Request().FormValue("character-name"),
-		CharacterInfo:        c.Request().FormValue("character-info"),
-		CharacterGender:      gender,
-		CharacterOnelineInfo: c.Request().FormValue("character-oneline-info"),
-		WorldView:            c.Request().FormValue("world-view"),
-		FirstMsgCharacter:    c.Request().FormValue("first-msg-character"),
-		CreatorComment:       c.Request().FormValue("creator-comment"),
-		CreatedAt:            createat,
+		CreatorID: user.ID,
+		CreatedAt: createat,
 	}
+
+	c.Bind(character)
+
+	character.CharacterGender = gender
 
 	if err := validateLength(c, "캐릭터 이름", character.CharacterName, 15); err != nil {
 		return err
