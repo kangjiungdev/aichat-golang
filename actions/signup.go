@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/pop/v6"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -78,8 +79,10 @@ func CreateAccountInDB(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.String("생년월일 형식이 올바르지 않습니다."))
 	}
 
+	tx := c.Value("tx").(*pop.Connection)
+
 	existUser := &models.User{}
-	err = models.DB.Where("user_id = ?", signupForm.UserId).First(existUser)
+	err = tx.Where("user_id = ?", signupForm.UserId).First(existUser)
 	if err == nil {
 		return c.Render(http.StatusBadRequest, r.String("해당 아이디를 가진 유저가 이미 존재합니다."))
 	}
@@ -105,7 +108,7 @@ func CreateAccountInDB(c buffalo.Context) error {
 		CreatedAt:   createat,
 	}
 
-	if err := models.DB.Create(user); err != nil {
+	if err := tx.Create(user); err != nil {
 		fmt.Println(err)
 		return c.Render(http.StatusInternalServerError, r.String("유저 생성 실패: "+err.Error()))
 	}

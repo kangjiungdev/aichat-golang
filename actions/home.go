@@ -2,10 +2,10 @@ package actions
 
 import (
 	"aichat_golang/models"
-	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/pop/v6"
 )
 
 func HomeHandler(c buffalo.Context) error {
@@ -14,15 +14,12 @@ func HomeHandler(c buffalo.Context) error {
 		c.Set("login", true)
 		c.Set("user", user)
 	}
+	tx := c.Value("tx").(*pop.Connection)
 	var characters []models.Character
-	err = models.DB.All(&characters)
+	err = tx.All(&characters)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
-
-	token := c.Value("authenticity_token")
-
-	fmt.Println(token)
 
 	c.Set("title", "Home")
 	c.Set("characters", characters)

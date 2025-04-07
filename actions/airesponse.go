@@ -12,6 +12,7 @@ import (
 	anthropic "github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/pop/v6"
 )
 
 func ResponseOfAI(c buffalo.Context) error {
@@ -37,8 +38,10 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	chatID := c.Request().FormValue("chat-id")
 
+	tx := c.Value("tx").(*pop.Connection)
+
 	chat := &models.Chat{}
-	err = models.DB.Find(chat, chatID)
+	err = tx.Find(chat, chatID)
 
 	if err != nil {
 		fmt.Println("에러: ", err)
@@ -50,7 +53,7 @@ func ResponseOfAI(c buffalo.Context) error {
 	}
 
 	character := &models.Character{}
-	err = models.DB.Find(character, chat.CharacterID)
+	err = tx.Find(character, chat.CharacterID)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Render(http.StatusBadRequest, r.String("캐릭터 찾기 실패: "+err.Error()))
@@ -77,7 +80,7 @@ func ResponseOfAI(c buffalo.Context) error {
 	var previousConversation []Conversation
 	var chatSummary []models.ChatSummary
 
-	err = models.DB.Q().Where("chat_id = ?", chatID).All(&chatSummary)
+	err = tx.Q().Where("chat_id = ?", chatID).All(&chatSummary)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -109,7 +112,7 @@ func ResponseOfAI(c buffalo.Context) error {
 
 			chatSummary = append(chatSummary, *saveSummary)
 
-			if err = models.DB.Create(saveSummary); err != nil {
+			if err = tx.Create(saveSummary); err != nil {
 				fmt.Println(err)
 				return c.Render(http.StatusInternalServerError, r.String(err.Error()))
 			}
@@ -139,7 +142,7 @@ func ResponseOfAI(c buffalo.Context) error {
 
 		chatSummary = append(chatSummary, *saveSummary)
 
-		if err = models.DB.Create(saveSummary); err != nil {
+		if err = tx.Create(saveSummary); err != nil {
 			fmt.Println(err)
 			return c.Render(http.StatusInternalServerError, r.String(err.Error()))
 		}
@@ -211,7 +214,7 @@ func ResponseOfAI(c buffalo.Context) error {
 	chat.UserMessage = append(chat.UserMessage, userMsg)
 	chat.AiMessage = append(chat.AiMessage, message.Content[0].Text)
 
-	err = models.DB.Update(chat)
+	err = tx.Update(chat)
 
 	if err != nil {
 		fmt.Println("DB Update Error", err)

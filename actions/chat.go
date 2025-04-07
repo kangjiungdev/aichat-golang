@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/pop/v6"
 )
 
 func ChatPage(c buffalo.Context) error {
@@ -20,8 +21,10 @@ func ChatPage(c buffalo.Context) error {
 	}
 	chatID := c.Param("chat_id")
 
+	tx := c.Value("tx").(*pop.Connection)
+
 	chat := &models.Chat{}
-	err = models.DB.Find(chat, chatID)
+	err = tx.Find(chat, chatID)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 채팅 id 찾기 실패
@@ -32,14 +35,14 @@ func ChatPage(c buffalo.Context) error {
 	}
 
 	character := &models.Character{}
-	err = models.DB.Find(character, chat.CharacterID)
+	err = tx.Find(character, chat.CharacterID)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 캐릭터 id 찾기 실패
 	}
 
 	creator := &models.User{}
-	err = models.DB.Find(creator, character.CreatorID)
+	err = tx.Find(creator, character.CreatorID)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 크리에이터 id 찾기 실패
@@ -75,13 +78,15 @@ func ChatMainPage(c buffalo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 
+	tx := c.Value("tx").(*pop.Connection)
+
 	var chats []models.Chat
-	err = models.DB.Where("user_id = ?", user.ID).All(&chats)
+	err = tx.Where("user_id = ?", user.ID).All(&chats)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
 	var characters []models.Character
-	err = models.DB.All(&characters)
+	err = tx.All(&characters)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
@@ -113,13 +118,15 @@ func CreateChat(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.String("character_id 변환 실패"))
 	}
 
+	tx := c.Value("tx").(*pop.Connection)
+
 	chat := &models.Chat{
 		UserID:      user.ID,
 		CharacterID: characterID,
 		UserMessage: []string{},
 		AiMessage:   []string{},
 	}
-	if err := models.DB.Create(chat); err != nil {
+	if err := tx.Create(chat); err != nil {
 		fmt.Println(err)
 		return c.Render(http.StatusInternalServerError, r.String(err.Error()))
 	}
@@ -136,9 +143,11 @@ func DeleteChat(c buffalo.Context) error {
 
 	chatID := c.Param("chat_id")
 
+	tx := c.Value("tx").(*pop.Connection)
+
 	chat := &models.Chat{}
 
-	if err := models.DB.Find(chat, chatID); err != nil {
+	if err := tx.Find(chat, chatID); err != nil {
 		fmt.Println("Can't Find Chat:", err)
 		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다"))
 	}
@@ -149,18 +158,18 @@ func DeleteChat(c buffalo.Context) error {
 
 	var chatSummary []models.ChatSummary
 
-	err = models.DB.Where("chat_id = ?", chatID).All(&chatSummary)
+	err = tx.Where("chat_id = ?", chatID).All(&chatSummary)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Render(http.StatusBadRequest, r.String("Chat Summary 찾기 실패"))
 	}
 
-	if err := models.DB.Destroy(chat); err != nil {
+	if err := tx.Destroy(chat); err != nil {
 		return c.Render(http.StatusInternalServerError, r.String("삭제 실패: "+err.Error()))
 	}
 
 	for _, summary := range chatSummary {
-		if err := models.DB.Destroy(&summary); err != nil {
+		if err := tx.Destroy(&summary); err != nil {
 			return c.Render(http.StatusInternalServerError, r.String("삭제 실패: "+err.Error()))
 		}
 	}
@@ -176,9 +185,12 @@ func DeleteMessage(c buffalo.Context) error {
 	}
 
 	chatID := c.Param("chat_id")
+
+	tx := c.Value("tx").(*pop.Connection)
+
 	chat := &models.Chat{}
 
-	if err := models.DB.Find(chat, chatID); err != nil {
+	if err := tx.Find(chat, chatID); err != nil {
 		fmt.Println("Can't Find Chat:", err)
 		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다"))
 	}
@@ -197,20 +209,20 @@ func DeleteMessage(c buffalo.Context) error {
 
 	var chatSummary []models.ChatSummary
 
-	err = models.DB.Where("chat_id = ?", chatID).All(&chatSummary)
+	err = tx.Where("chat_id = ?", chatID).All(&chatSummary)
 	if err != nil {
 		fmt.Println("에러: ", err)
 		return c.Render(http.StatusBadRequest, r.String("Chat Summary 찾기 실패"))
 	}
 
-	if err = models.DB.Update(chat); err != nil {
+	if err = tx.Update(chat); err != nil {
 		fmt.Println("Update Failed:", err)
 		return c.Render(http.StatusInternalServerError, r.String("채팅 저장 실패"))
 	}
 
 	for _, summary := range chatSummary {
 		if summary.MessageID == len(chat.UserMessage)-4 {
-			if err := models.DB.Destroy(&summary); err != nil {
+			if err := tx.Destroy(&summary); err != nil {
 				return c.Render(http.StatusInternalServerError, r.String("Summary 삭제 실패"))
 			}
 		}
@@ -243,9 +255,11 @@ func GetAllMessage(c buffalo.Context) error {
 
 	chatID := c.Param("chat_id")
 
+	tx := c.Value("tx").(*pop.Connection)
+
 	chat := &models.Chat{}
 
-	if err = models.DB.Find(chat, chatID); err != nil {
+	if err = tx.Find(chat, chatID); err != nil {
 		fmt.Println("Can't Find Chat:", err)
 		return c.Render(http.StatusNotFound, r.String("채팅을 찾을 수 없습니다 "+err.Error()))
 	}

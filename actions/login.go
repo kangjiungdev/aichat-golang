@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/pop/v6"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -44,17 +45,19 @@ func GetUserData(c buffalo.Context) error {
 		fmt.Println("아이디는 6자~15자여야 합니다.")
 		return c.Render(http.StatusBadRequest, r.String("아이디는 6자~15자여야 합니다."))
 	}
+
+	tx := c.Value("tx").(*pop.Connection)
+
 	user := &models.User{}
-	err := models.DB.Where("user_id = ?", userId).First(user)
+
+	err := tx.Where("user_id = ?", userId).First(user)
 	if err != nil {
-		fmt.Println("에러: ", err)
-		return c.Render(http.StatusBadRequest, r.String("아이디 또는 비밀번호가 올바르지 않습니다.")) // DB에서 유저 찾기 실패
+		return c.Render(http.StatusUnauthorized, r.String("아이디 또는 비밀번호가 올바르지 않습니다.")) // DB에서 유저 찾기 실패
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		fmt.Println("에러: ", err)
-		return c.Render(http.StatusBadRequest, r.String("아이디 또는 비밀번호가 올바르지 않습니다.")) // 비번 틀림
+		return c.Render(http.StatusUnauthorized, r.String("아이디 또는 비밀번호가 올바르지 않습니다.")) // 비번 틀림
 	}
 
 	c.Session().Set("current_user_id", user.ID)

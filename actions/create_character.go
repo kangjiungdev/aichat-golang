@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/google/uuid"
 )
 
@@ -102,7 +103,9 @@ func CreateCharacterOnDB(c buffalo.Context) error {
 		file.Close()
 	}
 
-	if err := models.DB.Create(character); err != nil {
+	tx := c.Value("tx").(*pop.Connection)
+
+	if err := tx.Create(character); err != nil {
 		fmt.Println(err)
 		return c.Render(http.StatusInternalServerError, r.String(err.Error()))
 	}
