@@ -66,6 +66,13 @@ func App() *buffalo.App {
 		// Setup and use translations:
 		app.Use(translations())
 
+		app.Use(func(next buffalo.Handler) buffalo.Handler {
+			return func(c buffalo.Context) error {
+				c.Response().Header().Set("Cache-Control", "no-store")
+				return next(c)
+			}
+		})
+
 		app.GET("/signup", SignUp)
 		app.POST("/signup", CreateAccountInDB)
 
