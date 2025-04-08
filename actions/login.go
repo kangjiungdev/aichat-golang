@@ -23,6 +23,11 @@ func LogInPage(c buffalo.Context) error {
 }
 
 func GetUserData(c buffalo.Context) error {
+	_, err := LogIn(c)
+	if err == nil {
+		return c.Render(http.StatusBadRequest, r.String("로그인이 이미 되어 있습니다."))
+	}
+
 	userId := c.Request().FormValue("user-id")
 	password := c.Request().FormValue("password")
 
@@ -50,7 +55,7 @@ func GetUserData(c buffalo.Context) error {
 
 	user := &models.User{}
 
-	err := tx.Where("user_id = ?", userId).First(user)
+	err = tx.Where("user_id = ?", userId).First(user)
 	if err != nil {
 		return c.Render(http.StatusUnauthorized, r.String("아이디 또는 비밀번호가 올바르지 않습니다.")) // DB에서 유저 찾기 실패
 	}

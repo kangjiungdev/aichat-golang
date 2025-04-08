@@ -16,7 +16,6 @@ import (
 func ChatPage(c buffalo.Context) error {
 	user, err := LogIn(c)
 	if err != nil {
-		fmt.Println(err)
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 	chatID := c.Param("chat_id")
@@ -47,9 +46,9 @@ func ChatPage(c buffalo.Context) error {
 		fmt.Println("에러: ", err)
 		return c.Redirect(http.StatusSeeOther, "/chat") // DB에서 크리에이터 id 찾기 실패
 	}
-	firstMsg := replaceMessages(character.FirstMsgCharacter, user.Name, character.CharacterName)
-	worldView := replaceMessages(character.WorldView, user.Name, character.CharacterName)
-	characterInfo := replaceMessages(character.CharacterInfo, user.Name, character.CharacterName)
+	firstMsg := ReplaceMessages(character.FirstMsgCharacter, user.Name, character.CharacterName)
+	worldView := ReplaceMessages(character.WorldView, user.Name, character.CharacterName)
+	characterInfo := ReplaceMessages(character.CharacterInfo, user.Name, character.CharacterName)
 	escapedInfo, err := json.Marshal(characterInfo)
 
 	if err != nil {
@@ -74,7 +73,6 @@ func ChatPage(c buffalo.Context) error {
 func ChatMainPage(c buffalo.Context) error {
 	user, err := LogIn(c)
 	if err != nil {
-		fmt.Println(err)
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 
@@ -108,7 +106,6 @@ func ChatMainPage(c buffalo.Context) error {
 func CreateChat(c buffalo.Context) error {
 	user, err := LogIn(c)
 	if err != nil {
-		fmt.Println(err)
 		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 	characterStringID := c.Param("character_id")
@@ -250,7 +247,7 @@ func GetAllMessage(c buffalo.Context) error {
 
 	user, err := LogIn(c)
 	if err != nil {
-		return c.Render(http.StatusBadRequest, r.String("로그인 안됨 "+err.Error()))
+		return c.Render(http.StatusBadRequest, r.String(err.Error()))
 	}
 
 	chatID := c.Param("chat_id")
@@ -271,7 +268,7 @@ func GetAllMessage(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.JSON(chat))
 }
 
-func replaceMessages(s, userName, charName string) string {
+func ReplaceMessages(s, userName, charName string) string {
 	s = strings.ReplaceAll(s, "{{user}}", fmt.Sprintf("{{%s}}", userName))
 	return strings.ReplaceAll(s, "{{char}}", charName)
 }

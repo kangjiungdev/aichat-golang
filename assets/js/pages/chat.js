@@ -71,6 +71,7 @@ async function chatPageLoad() {
 chatPageLoad()
 
 navCharacterInfoButton.addEventListener("click", function() {
+    const characterName = document.querySelector(".navbar-div3 span").dataset.characterName
     const imgsRoute = chatCharacterImage.dataset.img
     const imgArray = JSON.parse(imgsRoute);
     const characterInfo = JSON.parse(document.querySelector(".nav-infodiv").dataset.characterInfo)
@@ -83,9 +84,10 @@ navCharacterInfoButton.addEventListener("click", function() {
     <!-- 좌측: 캐릭터 이미지 및 정보 -->
     <div class="popup-left">
       <div class="character-header">
+      <h3 class="popup-character-name">${characterName}</h3>
         <img src="${chatCharacterImage.src}" class="character-image" alt="캐릭터 이미지" style="width: 351.297px; height: 526.938px; object-fit: cover;">
         <div class="character-meta">
-          <span class="creator">@${creatorUserID}</span>
+          <a href="/user/${creatorUserID}" class="creator">@${creatorUserID}</a>
           <span class="views">8.1천</span>
           <span class="likes">444</span>
         </div>
@@ -99,7 +101,7 @@ navCharacterInfoButton.addEventListener("click", function() {
       </div>
 
 
-      <div class="title">${characterOnelineInfo}</div>
+      <div class="popup-oneline-info">${characterOnelineInfo}</div>
     </div>
 
     <!-- 우측: 세계관 + 캐릭터 소개 -->

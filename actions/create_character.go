@@ -18,8 +18,7 @@ import (
 func CreateCharacterPage(c buffalo.Context) error {
 	user, err := LogIn(c)
 	if err != nil {
-		fmt.Println(err)
-		c.Redirect(http.StatusSeeOther, "/login")
+		return c.Redirect(http.StatusSeeOther, "/login")
 	}
 	c.Set("title", "Create Character")
 	c.Set("login", true)
@@ -29,7 +28,11 @@ func CreateCharacterPage(c buffalo.Context) error {
 }
 
 func CreateCharacterOnDB(c buffalo.Context) error {
-	user, _ := LogIn(c)
+	user, err := LogIn(c)
+	if err != nil {
+		return c.Render(http.StatusUnauthorized, r.String(err.Error()))
+	}
+
 	now := time.Now()
 	createat, err := time.Parse("2006-01-02", now.Format("2006-01-02"))
 	if err != nil {

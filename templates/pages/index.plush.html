@@ -1,8 +1,16 @@
 <div>
     <h1><%= title %> Page</h1>
     <%= for (character) in characters { %>
-        <%= form({action: "/chat/"+(character.ID), method: "POST", class: "create-chat-form"}) { %>
+        <div class="home-character-div"
+            data-character-id="<%= character.ID %>"
+            data-character-name="<%= character.CharacterName %>"
+            data-creator-userid="<%= characterCreator[character.CreatorID] %>"
+            data-img='<%= toJSON(character.CharacterAssets) %>'
+            data-character-oneline-info="<%= character.CharacterOnelineInfo %>"
+            data-character-info="<%= character.CharacterInfo %>"
+            data-character-world-view="<%= character.WorldView %>">
             <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="home-character-image">
-            <button><%= character.CharacterName %></button>
-    <% }} %>
+            <%= character.CharacterName %>
+        </div>
+    <% } %>
 </div>

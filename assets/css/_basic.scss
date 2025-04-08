@@ -45,7 +45,7 @@
   }
   
   /* 공통 컨테이너 */
-  .container {
+.container {
     display: flex;
     width: 100%;
     height: 100%;
@@ -54,12 +54,20 @@
     padding-bottom: 0px;
     margin-bottom: 0px;
     box-sizing: border-box;
-  }
+}
   
-  textarea {
+textarea {
     resize: none;
-  }
+}
   
-  br {
+br {
     display: none;
+}
+
+a {
+  color: $yellow;
+  text-decoration: none;
+  &:hover {
+    color: $yellow-hover;
   }
+}

@@ -59,8 +59,8 @@ func ResponseOfAI(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.String("캐릭터 찾기 실패: "+err.Error()))
 	}
 
-	worldView := replaceMessages(character.WorldView, userName, character.CharacterName)
-	characterInfo := replaceMessages(character.CharacterInfo, userName, character.CharacterName)
+	worldView := ReplaceMessages(character.WorldView, userName, character.CharacterName)
+	characterInfo := ReplaceMessages(character.CharacterInfo, userName, character.CharacterName)
 
 	dataforai := DataForAI{
 		MyName:          fmt.Sprintf("내 이름은 '%s'(이)다.", userName),

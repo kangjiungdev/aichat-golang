@@ -1,0 +1,109 @@
+.character-popup {
+  position: fixed;          /* 화면 고정 */
+  top: 50%;                 /* 화면 위에서 50% */
+  left: 50%;                /* 화면 왼쪽에서 50% */
+  transform: translate(-50%, -50%); /* 정확히 가운데 정렬 */
+  z-index: 9999;            /* 가장 위로 */
+  background: $gray-bg;      /* 배경 (필요시) */
+  padding: 17px 24px 11px;            /* 내부 여백 */
+  border-radius: 12px;      /* 모서리 둥글게 */
+  max-width: 1100px;
+  width: 100%;
+  max-height: 90vh;
+  will-change: transform;
+  overflow-y: auto;
+  box-shadow: 0 0 30px rgba(0,0,0,0.6);
+}
+
+
+.popup-container {
+  display: flex;
+  padding: 10px 0px 15px 8px;
+
+  .character-header {
+    display: inline-block;
+    width: auto;
+  }
+
+  h3{
+    font-size: 18px;
+    &.popup-character-name {
+        color: white;
+    }
+  }
+}
+
+.popup-left {
+  width: 40%;
+  padding-right: 16px;
+
+  .popup-oneline-info {
+    margin-top: 3%;
+  }
+}
+
+.popup-right {
+  width: 60%;
+
+  .section {
+    height: 45%;
+    border-top: 1px solid #444;
+    padding-top: 16px;
+    max-height: 45vh;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+  }
+}
+
+.character-image {
+  border-radius: 8px;
+}
+
+.character-meta {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.thumbnail-row {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.thumb.active {
+  opacity: 1;
+  border: 2px solid white;
+}
+
+.popup-footer {
+  border-top: 1px solid #444;
+  padding: 16px 24px 3.5px;
+}
+
+.popup-footer label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.popup-footer p {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #ccc;
+}
