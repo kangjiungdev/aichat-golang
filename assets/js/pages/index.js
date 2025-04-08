@@ -37,18 +37,10 @@ $homeCharacterDiv.on("click", function() {
 
     <!-- 우측: 세계관 + 캐릭터 소개 -->
     <div class="popup-right">
-      <div class="section">
-        <h3>세계관</h3>
-        <p>
-          ${convertText(characterWorldView)}
-        </p>
-      </div>
+      <div class="section"><h3>세계관</h3><p>${convertText(characterWorldView)}</p></div>
 
-      <div class="section">
-        <h3>캐릭터 소개</h3>
-        <p style="white-space: pre-wrap;">${convertText(characterInfo)}</p>
-      </div>
-      <button id="create-chat-button" data-character-id="${this.dataset.characterId}">대화 시작</button>
+      <div class="section"><h3>캐릭터 소개</h3><p style="white-space: pre-wrap;">${convertText(characterInfo)}</p></div>
+      <button id="popup-chat-button" data-character-id="${this.dataset.characterId}">대화 시작</button>
     </div>
   </div>
     `
@@ -73,7 +65,7 @@ $homeCharacterDiv.on("click", function() {
 })
 
 
-$(document).on("click", "#create-chat-button", async function (event) {
+$(document).on("click", "#popup-chat-button", async function (event) {
     const characterID = $(this).data("character-id");
     try {
         const req = await fetch("/chat/" + characterID, {

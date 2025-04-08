@@ -3,13 +3,7 @@
         <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" data-img='<%= toJSON(character.CharacterAssets) %>' class="chat-character-image">
     </div>
     <div class="right-div">
-    <div id="chat-box">
-        <%= if (firstMsg != "") { %>
-            <div class="ai-chat-block-div chat-block-div">
-                <p id="first-message"><%= firstMsg %></p>
-            </div>
-        <% } %>
-    </div>
+    <div id="chat-box"><%= if (firstMsg != "") { %><div class="ai-chat-block-div chat-block-div"><p id="first-message"><%= firstMsg %></p></div><% } %></div>
     <%= form({action: "/ai-response", method: "POST", id: "ai-req-form"}) { %>
         <label for="my-name-input" class="hidden">
             <p>이름</p>

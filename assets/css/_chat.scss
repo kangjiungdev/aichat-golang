@@ -31,6 +31,10 @@
   padding: 15px;
   overflow-y: auto;
   box-sizing: border-box;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .hidden {
@@ -284,4 +288,7 @@
 .chat-main-span {
   margin: 0px;
   display: inline;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }

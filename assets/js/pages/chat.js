@@ -222,18 +222,18 @@ chatInput.addEventListener("keydown", event => {
 })
 
 if(firstMessageOfCharacter) {
-    const firstMsgConverted = convertText(firstMessageOfCharacter.innerText)
-    firstMessageOfCharacter.innerText = firstMsgConverted
+    const firstMsgConverted = convertText(firstMessageOfCharacter.textContent)
+    firstMessageOfCharacter.textContent = firstMsgConverted
     
-    const checkAction = actionChat(firstMessageOfCharacter.innerText)
-    firstMessageOfCharacter.innerText = ""
+    const checkAction = actionChat(firstMessageOfCharacter.textContent)
+    firstMessageOfCharacter.textContent = ""
     checkAction.forEach((object) => {
         const chatSpan = document.createElement("span")
         if(object.word) {
-            chatSpan.innerText = object.word
+            chatSpan.textContent = object.word
                 chatSpan.classList.add("ai-conversation-chat")
         } else {
-            chatSpan.innerText = object.act
+            chatSpan.textContent = object.act
                 chatSpan.classList.add("ai-action-chat")
         }
         chatSpan.classList.add("chat-span")
