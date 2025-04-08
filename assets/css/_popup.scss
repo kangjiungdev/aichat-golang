@@ -9,7 +9,7 @@
   border-radius: 12px;      /* 모서리 둥글게 */
   max-width: 1100px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 90%;
   will-change: transform;
   overflow-y: auto;
   box-shadow: 0 0 30px rgba(0,0,0,0.6);
@@ -33,6 +33,10 @@
   }
 }
 
+.chat-popup-container {
+  height: 82vh;
+}
+
 .popup-left {
   width: 40%;
   padding-right: 16px;
@@ -44,12 +48,13 @@
 
 .popup-right {
   width: 60%;
+  height: 84vh;
 
   .section {
     height: 45%;
     border-top: 1px solid #444;
     padding-top: 16px;
-    max-height: 45vh;
+    max-height: 45%;
     overflow-y: auto;
     white-space: pre-wrap;
     overflow-wrap: break-word;
@@ -59,6 +64,9 @@
     -ms-overflow-style: none;  /* IE and Edge */
     &::-webkit-scrollbar {
         display: none;
+    }
+    &:first-child {
+      margin-top: 5%;
     }
   }
 }
@@ -78,7 +86,7 @@
     line-height: 1; /* ← 글자 수직 정렬 핵심 */
     height: 45px;
     width: 100%;
-    margin-top: 5%;
+    margin-top: 2.5%;
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -122,6 +130,16 @@
 .popup-footer {
   border-top: 1px solid #444;
   padding: 16px 24px 3.5px;
+
+  h4 {
+    margin-bottom: 2%;
+  }
+
+  textarea,
+  input {
+    color: rgb(209 213 219);
+  }
+
 }
 
 .popup-footer label {

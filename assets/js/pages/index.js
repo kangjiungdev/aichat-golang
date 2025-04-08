@@ -66,7 +66,7 @@ $homeCharacterDiv.on("click", function() {
 
 
 $(document).on("click", "#popup-chat-button", async function (event) {
-    const characterID = $(this).data("character-id");
+    const characterID = this.dataset.characterId;
     try {
         const req = await fetch("/chat/" + characterID, {
             method: "POST",
@@ -97,7 +97,7 @@ function convertText(text) {
     const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
     const name = matches.map(m => m[1]);
-        textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
+    textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
     return textConverted
 }
 

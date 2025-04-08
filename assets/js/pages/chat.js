@@ -80,7 +80,7 @@ navCharacterInfoButton.addEventListener("click", function() {
     const creatorUserID = document.querySelector(".navbar-chat-user-id span").dataset.creatorUserid
     const characterInfoDiv = document.createElement("div")
     characterInfoDiv.innerHTML = `
-    <div class="popup-container">
+    <div class="popup-container chat-popup-container">
     <!-- 좌측: 캐릭터 이미지 및 정보 -->
     <div class="popup-left">
       <div class="character-header">
@@ -106,17 +106,9 @@ navCharacterInfoButton.addEventListener("click", function() {
 
     <!-- 우측: 세계관 + 캐릭터 소개 -->
     <div class="popup-right">
-      <div class="section">
-        <h3>세계관</h3>
-        <p>
-          ${convertText(characterWorldView)}
-        </p>
-      </div>
+      <div class="section"><h3>세계관</h3><p>${convertText(characterWorldView)}</p></div>
 
-      <div class="section">
-        <h3>캐릭터 소개</h3>
-        <p style="white-space: pre-wrap;">${convertText(characterInfo)}</p>
-      </div>
+      <div class="section"><h3>캐릭터 소개</h3><p style="white-space: pre-wrap;">${convertText(characterInfo)}</p></div>
     </div>
   </div>
 
