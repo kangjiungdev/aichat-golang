@@ -107,15 +107,24 @@
   color: #aaa;
 }
 
-.thumbnail-row {
-  margin-top: 12px;
+.thumbnail-wrapper {
+  position: relative;
   display: flex;
+  align-items: center;
+  width: 351.297px; /* 필요시 고정 너비 지정 */
+  margin-top: 12px;
+}
+
+.thumbnail-row {
+  display: flex;
+  align-items: center; /* 이게 핵심! */
   gap: 8px;
-  width: 351.297px;
+  width: 100%;
   overflow-x: auto;
   padding-bottom: 7px;
   scrollbar-width: thin;
   scrollbar-color: #444 transparent;
+  flex-shrink: 1;
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -139,13 +148,47 @@
 }
 
 .thumb {
-  width: 50.6px;
-  height: 50.6px;
+  width: 50.5495px;
+  height: 50.5495px;
   object-fit: cover;
   flex-shrink: 0;
   border-radius: 4px;
   opacity: 0.6;
   cursor: pointer;
+}
+
+.thumb-scroll-btn {
+  display: flex;
+  position: absolute;
+  top: 0;
+  align-items: center;  /* 내부 텍스트 세로 정렬 */
+  justify-content: center;
+  user-select: none;
+  border: none;
+  width: 29.27475px;
+  height: 29.27475px;
+  background-color: transparent;
+  transform: translateY(10.637px); /* 썸네일 세로 높이 기준 수동 보정 */
+  &.right-btn {
+    right: 5%;
+  }
+  &.left-btn {
+    left: 5%;
+  }
+  z-index: 1;
+  svg {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    display: block;
+    color: white;
+    &:hover {
+      color: $yellow;
+    }
+    &:active {
+      color: $yellow-hover;
+    }
+  }
 }
 
 .thumb.active {

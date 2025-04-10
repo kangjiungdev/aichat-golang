@@ -1,3 +1,5 @@
+import { popup } from '../components/popup';
+
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 const deleteChatBtn = document.getElementsByClassName("delete-chat")
 const userName = document.querySelectorAll(".chat-footer-username")
@@ -105,11 +107,16 @@ $(".character-info-btn").on("click", async function() {
     </div>
     
     <!-- 썸네일 리스트 -->
-    <div class="thumbnail-row">
-      ${imgsRoute.map(element => {
-          return `<img src="/${element}" class="thumb">`;
-        }).join('')}
-    </div>
+      <div class="thumbnail-wrapper">
+        <div class="thumbnail-row">
+          ${imgsRoute.map(element => {
+            return `<img src="/${element}" class="thumb">`;
+           }).join('')}
+        </div>
+        <div class="thumb-scroll-btn right-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </div>
+      </div>
 
 
     <div class="popup-oneline-info">${htmlToText(characterOnelineInfo)}</div>
@@ -141,6 +148,7 @@ $(".character-info-btn").on("click", async function() {
           document.querySelector(".character-image").src = this.src
       })
   })
+  popup.bindScrollEvent()
   showBlurOverlay()
 })
 
