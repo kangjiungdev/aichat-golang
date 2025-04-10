@@ -94,7 +94,7 @@
 
 /* AI 대화 메시지 (하얀색) */
 .ai-conversation-chat {
-  color: white;
+  color: #e5e5e5;
 }
 
 /* AI 액션 메시지 (노란색) */
@@ -147,21 +147,16 @@
 }
 
 .navbar-chat-go-back svg {
-  width: 24px;
-  height: 24px;
-  margin-right: 15px;
-  stroke: white;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+    stroke: white;
+    transition: opacity 0.2s ease;
 }
 
 .ai-chat-block-div {
   margin-bottom: 2.2vw; /* 기존보다 살짝 더 여백 증가 */
-}
-
-.ai-action-chat, .ai-conversation-chat {
-  display: block; /* 줄 바꿈 강제 적용 */
-  margin-bottom: 1vw; /* 간격 추가 */
 }
 
 #chat-enter-button {

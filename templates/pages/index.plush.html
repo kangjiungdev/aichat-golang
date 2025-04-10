@@ -1,14 +1,7 @@
 <div>
     <h1><%= title %> Page</h1>
     <%= for (character) in characters { %>
-        <div class="home-character-div"
-            data-character-id="<%= character.ID %>"
-            data-character-name="<%= character.CharacterName %>"
-            data-creator-userid="<%= characterCreator[character.CreatorID] %>"
-            data-img='<%= toJSON(character.CharacterAssets) %>'
-            data-character-oneline-info="<%= character.CharacterOnelineInfo %>"
-            data-character-info="<%= character.CharacterInfo %>"
-            data-character-world-view="<%= character.WorldView %>">
+        <div class="home-character-div" data-character-id="<%= character.ID %>">
             <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="home-character-image">
             <%= character.CharacterName %>
         </div>

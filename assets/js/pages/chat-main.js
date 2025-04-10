@@ -53,7 +53,7 @@ if (deleteChatBtn.length > 0) {
                     localStorage.setItem("userInfos", JSON.stringify(userInfos));
                 } else {
                     const res = await req.text()
-                    console.log(res)
+                    console.error(res)
                 }
             }
             catch (e) {
@@ -69,21 +69,33 @@ chatPreview.forEach(element => {
 
 
 
-$(".character-info-btn").on("click", function() {
-  const chatID = this.dataset.chatId
-  const creatorUserID = this.dataset.creatorUserid
-  const characterName = this.dataset.characterName
-  const imgsRoute = JSON.parse(this.dataset.img)
-  const characterInfo = this.dataset.characterInfo
-  const characterWorldView = this.dataset.characterWorldView
-  const characterOnelineInfo = this.dataset.characterOnelineInfo
+$(".character-info-btn").on("click", async function() {
+  let res
+  try {
+    const req = await fetch("/get-character-data", {
+      method:"POST",
+      headers: {"Content-Type": "text/plain", "X-CSRF-Token":csrfToken},
+      body: this.dataset.characterId
+    })
+    res = await req.json()
+  } catch (e) {
+    console.error(e)
+    return
+  }
+  const creatorUserID = res["creator_id"]
+  const characterName = res["character_name"]
+  const imgsRoute = res["character_assets"]
+  const characterInfo = res["character_info"]
+  const characterWorldView = res["world_view"]
+  const characterOnelineInfo = res["character_oneline_info"]
+
   const characterInfoDiv = document.createElement("div")
   characterInfoDiv.innerHTML = `
   <div class="popup-container">
   <!-- 좌측: 캐릭터 이미지 및 정보 -->
   <div class="popup-left">
     <div class="character-header">
-      <h3 class="popup-character-name">${characterName}</h3>
+      <h3 class="popup-character-name">${htmlToText(characterName)}</h3>
       <img src="${imgsRoute[0]}" class="character-image" alt="캐릭터 이미지" style="width: 351.297px; height: 526.938px; object-fit: cover;">
       <div class="character-meta">
         <a href="/user/${creatorUserID}" class="creator">@${creatorUserID}</a>
@@ -100,14 +112,14 @@ $(".character-info-btn").on("click", function() {
     </div>
 
 
-    <div class="popup-oneline-info">${characterOnelineInfo}</div>
+    <div class="popup-oneline-info">${htmlToText(characterOnelineInfo)}</div>
   </div>
 
   <!-- 우측: 세계관 + 캐릭터 소개 -->
   <div class="popup-right">
-    <div class="section"><h3>세계관</h3><p>${popUpConvertText(characterWorldView)}</p></div>
+    <div class="section"><h3>세계관</h3><p>${htmlToText(popUpConvertText(characterWorldView))}</p></div>
 
-    <div class="section"><h3>캐릭터 소개</h3><p style="white-space: pre-wrap;">${popUpConvertText(characterInfo)}</p></div>
+    <div class="section"><h3>캐릭터 소개</h3><p style="white-space: pre-wrap;">${htmlToText(popUpConvertText(characterInfo))}</p></div>
     <button id="popup-chat-button" onclick='location.href="/chat/${chatID}"' data-character-id="${this.dataset.characterId}">대화 시작</button>
   </div>
 </div>
@@ -159,7 +171,9 @@ function removeBlurOverlay() {
   }
 }
 
-
+function htmlToText(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+}
 
 function parseAndDisplay(element) {
     const text = convertText(element);

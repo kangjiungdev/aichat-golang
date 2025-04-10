@@ -1,6 +1,6 @@
 <div class="ai-chat-div">
     <div class="left-img-div">
-        <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" data-img='<%= toJSON(character.CharacterAssets) %>' class="chat-character-image">
+        <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" data-img="<%= character.CharacterAssets[0] %>" class="chat-character-image">
     </div>
     <div class="right-div">
     <div id="chat-box"><%= if (firstMsg != "") { %><div class="ai-chat-block-div chat-block-div"><p id="first-message"><%= firstMsg %></p></div><% } %></div>

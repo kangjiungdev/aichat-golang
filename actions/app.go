@@ -82,6 +82,7 @@ func App() *buffalo.App {
 		app.POST("/logout", LogOut)
 
 		app.GET("/", HomeHandler)
+		app.POST("/get-character-data", GetCharacterData)
 
 		app.GET("/chat", ChatMainPage)
 		app.GET("/chat/{chat_id}", ChatPage)

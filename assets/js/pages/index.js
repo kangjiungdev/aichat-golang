@@ -2,20 +2,33 @@ const csrfToken = $('meta[name="csrf-token"]').attr("content");
 const $homeCharacterDiv = $(".home-character-div")
 
 
-$homeCharacterDiv.on("click", function() {
-    const creatorUserID = this.dataset.creatorUserid
-    const characterName = this.dataset.characterName
-    const imgsRoute = JSON.parse(this.dataset.img)
-    const characterInfo = this.dataset.characterInfo
-    const characterWorldView = this.dataset.characterWorldView
-    const characterOnelineInfo = this.dataset.characterOnelineInfo
+$homeCharacterDiv.on("click", async function() {
+    let res
+    try {
+      const req = await fetch("/get-character-data", {
+        method:"POST",
+        headers: {"Content-Type": "text/plain", "X-CSRF-Token":csrfToken},
+        body: this.dataset.characterId
+      })
+      res = await req.json()
+    } catch (e) {
+      console.error(e)
+      return
+    }
+    const creatorUserID = res["creator_id"]
+    const characterName = res["character_name"]
+    const imgsRoute = res["character_assets"]
+    const characterInfo = res["character_info"]
+    const characterWorldView = res["world_view"]
+    const characterOnelineInfo = res["character_oneline_info"]
+
     const characterInfoDiv = document.createElement("div")
     characterInfoDiv.innerHTML = `
     <div class="popup-container">
     <!-- 좌측: 캐릭터 이미지 및 정보 -->
     <div class="popup-left">
       <div class="character-header">
-        <h3 class="popup-character-name">${characterName}</h3>
+        <h3 class="popup-character-name">${htmlToText(characterName)}</h3>
         <img src="${imgsRoute[0]}" class="character-image" alt="캐릭터 이미지" style="width: 351.297px; height: 526.938px; object-fit: cover;">
         <div class="character-meta">
           <a href="/user/${creatorUserID}" class="creator">@${creatorUserID}</a>
@@ -32,7 +45,7 @@ $homeCharacterDiv.on("click", function() {
       </div>
 
 
-      <div class="popup-oneline-info">${characterOnelineInfo}</div>
+      <div class="popup-oneline-info">${htmlToText(characterOnelineInfo)}</div>
     </div>
 
     <!-- 우측: 세계관 + 캐릭터 소개 -->
@@ -97,8 +110,12 @@ function convertText(text) {
     const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
     const name = matches.map(m => m[1]);
-    textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
+    textConverted = htmlToText(text.replaceAll(`{{${name[0]}}}`, name[0]))
     return textConverted
+}
+
+function htmlToText(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }
 
 // blur 오버레이 추가

@@ -20,7 +20,7 @@ async function chatPageLoad() {
         chatCharacterImage.src = userInfos[chatID].characterImg
     }
 
-    const imgSrcWhenLoadErr = JSON.parse(chatCharacterImage.dataset.img)[0]
+    const imgSrcWhenLoadErr = chatCharacterImage.dataset.img
 
     if (chatCharacterImage.complete) {
         if (chatCharacterImage.naturalWidth === 0) {
@@ -70,21 +70,33 @@ async function chatPageLoad() {
 
 chatPageLoad()
 
-navCharacterInfoButton.addEventListener("click", function() {
-    const characterName = document.querySelector(".navbar-div3 span").dataset.characterName
-    const imgsRoute = chatCharacterImage.dataset.img
-    const imgArray = JSON.parse(imgsRoute);
-    const characterInfo = JSON.parse(document.querySelector(".nav-infodiv").dataset.characterInfo)
-    const characterWorldView = document.querySelector(".navbar-div1").dataset.characterWorldView
-    const characterOnelineInfo = document.querySelector(".navbar-div2").dataset.characterOnelineInfo
-    const creatorUserID = document.querySelector(".navbar-chat-user-id span").dataset.creatorUserid
+navCharacterInfoButton.addEventListener("click", async function() {
+    let res
+    try {
+      const req = await fetch("/get-character-data", {
+        method:"POST",
+        headers: {"Content-Type": "text/plain", "X-CSRF-Token":csrfToken},
+        body: this.dataset.characterId
+      })
+      res = await req.json()
+    } catch (e) {
+      console.error(e)
+      return
+    }
+    const creatorUserID = res["creator_id"]
+    const characterName = res["character_name"]
+    const imgsRoute = res["character_assets"]
+    const characterInfo = res["character_info"]
+    const characterWorldView = res["world_view"]
+    const characterOnelineInfo = res["character_oneline_info"]
+
     const characterInfoDiv = document.createElement("div")
     characterInfoDiv.innerHTML = `
     <div class="popup-container chat-popup-container">
     <!-- 좌측: 캐릭터 이미지 및 정보 -->
     <div class="popup-left">
       <div class="character-header">
-      <h3 class="popup-character-name">${characterName}</h3>
+      <h3 class="popup-character-name">${htmlToText(characterName)}</h3>
         <img src="${chatCharacterImage.src}" class="character-image" alt="캐릭터 이미지" style="width: 351.297px; height: 526.938px; object-fit: cover;">
         <div class="character-meta">
           <a href="/user/${creatorUserID}" class="creator">@${creatorUserID}</a>
@@ -95,20 +107,20 @@ navCharacterInfoButton.addEventListener("click", function() {
       
       <!-- 썸네일 리스트 -->
       <div class="thumbnail-row">
-        ${imgArray.map(element => {
+        ${imgsRoute.map(element => {
             return `<img src="/${element}" class="thumb">`;
           }).join('')}
       </div>
 
 
-      <div class="popup-oneline-info">${characterOnelineInfo}</div>
+      <div class="popup-oneline-info">${htmlToText(characterOnelineInfo)}</div>
     </div>
 
     <!-- 우측: 세계관 + 캐릭터 소개 -->
     <div class="popup-right">
-      <div class="section"><h3>세계관</h3><p>${convertText(characterWorldView)}</p></div>
+      <div class="section"><h3>세계관</h3><p>${htmlToText(convertText(characterWorldView))}</p></div>
 
-      <div class="section"><h3>캐릭터 소개</h3><p style="white-space: pre-wrap;">${convertText(characterInfo)}</p></div>
+      <div class="section"><h3>캐릭터 소개</h3><p style="white-space: pre-wrap;">${htmlToText(convertText(characterInfo))}</p></div>
     </div>
   </div>
 
@@ -193,12 +205,43 @@ aiReqForm.addEventListener("submit", async (event) => {
     try {
         const req = await fetch("/ai-response", {method:"POST", body: form})
         if(req.ok) {
-            const res = await req.text()
-            createChatBlock(res, "AI")
+            let aiText = "";
+            let chatBlock = createChatBlock("", "AI"); // 미리 빈 블럭
+            const chatContent = chatBlock.querySelector("p"); // <p> 가져옴
+            
+            const reader = req.body.getReader();
+            const decoder = new TextDecoder();
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+            
+                const chunk = decoder.decode(value, { stream: true });
+                aiText += chunk;
+            
+                // 다시 파싱해서 span으로 넣어줌
+                const parsed = actionChat(aiText);
+                chatContent.innerHTML = ""; // 초기화
+            
+                parsed.forEach(object => {
+                    const span = document.createElement("span");
+                    if (object.word) {
+                        span.innerText = object.word;
+                        span.classList.add("ai-conversation-chat");
+                    } else {
+                        span.innerText = object.act;
+                        span.classList.add("ai-action-chat");
+                    }
+                    span.classList.add("chat-span");
+                    chatContent.appendChild(span);
+                });
+            
+                scrollToBottom();
+            }
         } else {
             createChatBlock("오류가 발생했습니다. 현재 AI가 응답할 수 없는 상태입니다. 잠시 후 다시 시도해 주세요.", "AI")
         }
-    }   catch (e) {
+    } catch (e) {
         console.error(e)
     } finally {
         createDeleteButton()
@@ -217,7 +260,7 @@ if(firstMessageOfCharacter) {
     const firstMsgConverted = convertText(firstMessageOfCharacter.textContent)
     firstMessageOfCharacter.textContent = firstMsgConverted
     
-    const checkAction = actionChat(firstMessageOfCharacter.textContent)
+    const checkAction = actionChat(firstMsgConverted)
     firstMessageOfCharacter.textContent = ""
     checkAction.forEach((object) => {
         const chatSpan = document.createElement("span")
@@ -233,7 +276,7 @@ if(firstMessageOfCharacter) {
     })
 }
 
-document.querySelector(".navbar-chat-go-back").addEventListener("click", () => { history.back() })
+document.querySelector(".navbar-chat-go-back svg").addEventListener("click", () => { history.back() })
 
 storageSetEvent(userNameInput)
 storageSetEvent(userInfoInput)
@@ -267,6 +310,7 @@ function createChatBlock(chatContents, who) {
     chatBlock.appendChild(chat)
     chatBlock.classList.add("chat-block-div")
     chatBox.appendChild(chatBlock)
+    return chatBlock;
 }
 
 function convertText(text) {
@@ -280,6 +324,10 @@ function convertText(text) {
         textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
     }
     return textConverted
+}
+
+function htmlToText(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }
 
 function actionChat(chatContents) {

@@ -163,7 +163,6 @@ func ResponseOfAI(c buffalo.Context) error {
 비언어적 표현은 앞뒤에 * (별표 기호)를 붙여 감싸며, 말과 자연스럽게 동시에 일어나는 행동은 대사와 함께 써주세요.  
 대사 없이 단독 행동은 *...다* 형태로 끝내주세요.  
 감정, 표정, 눈빛, 몸짓을 시각적·감각적으로 묘사해 주세요.  
-
 모든 비언어적 행동 표현은 반드시 "~하고 있다", "~이다", "~한다" 등 서술형 문체를 사용해주세요.  
 "~하고 있습니다", "~입니다" 같은 존댓말 문체는 행동 표현에서는 절대 사용하지 마세요. 
 대사는 자유롭게 작성해도 됩니다.`),
@@ -199,29 +198,57 @@ func ResponseOfAI(c buffalo.Context) error {
 
 	msg = append(msg, anthropic.NewUserMessage(anthropic.NewTextBlock(userMsg)))
 
-	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
+	stream := client.Messages.NewStreaming(c.Request().Context(), anthropic.MessageNewParams{
 		Model:     anthropic.F(anthropic.ModelClaude3_7SonnetLatest),
 		MaxTokens: anthropic.F(int64(3072)),
 		System:    anthropic.F(systemText),
 		Messages:  anthropic.F(msg),
 	})
-
 	if err != nil {
-		fmt.Println("API call failed", err)
-		return c.Render(http.StatusInternalServerError, r.String("API call failed: "+err.Error()))
+		fmt.Println("Streaming error:", err)
+		return c.Render(http.StatusInternalServerError, r.String("스트리밍 에러: "+err.Error()))
+	}
+	defer stream.Close()
+
+	flusher, ok := c.Response().(http.Flusher)
+	if !ok {
+		return c.Render(http.StatusInternalServerError, r.String("Flusher not supported"))
 	}
 
+	// 최종 전체 응답을 저장할 변수
+	var finalText strings.Builder
+
+	for stream.Next() {
+		event := stream.Current()
+
+		if event.Type == "content_block_delta" {
+			if delta, ok := event.Delta.(anthropic.ContentBlockDeltaEventDelta); ok {
+				finalText.WriteString(delta.Text)
+				fmt.Fprintf(c.Response(), "%s", delta.Text)
+				flusher.Flush()
+			} else {
+				fmt.Println("Delta 타입 캐스팅 실패:", event.Delta)
+			}
+		}
+	}
+
+	if err := stream.Err(); err != nil {
+		fmt.Println("Stream error:", err)
+		return c.Render(http.StatusInternalServerError, r.String("스트리밍 도중 오류 발생: "+err.Error()))
+	}
+
+	// 채팅 기록에 저장
 	chat.UserMessage = append(chat.UserMessage, userMsg)
-	chat.AiMessage = append(chat.AiMessage, message.Content[0].Text)
+	chat.AiMessage = append(chat.AiMessage, finalText.String())
 
 	err = tx.Update(chat)
-
 	if err != nil {
 		fmt.Println("DB Update Error", err)
 		return c.Render(http.StatusBadRequest, r.String("DB Update Error: "+err.Error()))
 	}
 
-	return c.Render(http.StatusOK, r.String(message.Content[0].Text))
+	// 스트리밍 출력이 이미 끝났으니 여기선 아무 것도 반환 안 해도 됨
+	return nil
 }
 
 func CheckWho(previousConversation []Conversation) []anthropic.MessageParam {

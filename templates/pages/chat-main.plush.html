@@ -22,12 +22,7 @@
               <div class="chat-buttons">
                 <button class="character-info-btn"
                 data-chat-id="<%= chat.ID %>"
-                data-creator-userid="<%= characterCreator[character.CreatorID] %>"
-                data-character-name="<%= character.CharacterName %>"
-                data-img='<%= toJSON(character.CharacterAssets) %>'
-                data-character-info="<%= character.CharacterInfo %>"
-                data-character-oneline-info="<%= character.CharacterOnelineInfo %>"
-                data-character-world-view="<%= character.WorldView %>"
+                data-character-id="<%= character.ID %>"
                 >캐릭터 정보</button>
                 <button onclick="location.href='/chat/<%= chat.ID %>'">대화 시작</button>
                 <button class="delete-chat" value="<%= chat.ID %>">대화 삭제</button>
