@@ -10,7 +10,7 @@ const chatPreview = document.querySelectorAll(".chat-preview")
 userName.forEach(element => {
   const chatID = element.closest(".chat-card").dataset.chatId
   const [validation, userInfos] = userInfosValidationCheck(chatID)
-  if (validation) {
+  if (validation && userInfos[chatID]?.userName) {
       element.innerText = userInfos[chatID].userName
   }
 })
@@ -19,7 +19,7 @@ chatCharacterImage.forEach(element => {
     const currentImgSrc = element.src
     const chatID = element.closest(".chat-card").dataset.chatId
     const [validation, userInfos] = userInfosValidationCheck(chatID)
-    if (validation) {
+    if (validation && userInfos[chatID]?.characterImg) {
         element.src = userInfos[chatID].characterImg
     }
 
@@ -27,14 +27,14 @@ chatCharacterImage.forEach(element => {
         if (chatCharacterImage.naturalWidth === 0) {
           console.error('로드 실패: 이미지가 없거나 깨졌음');
           element.src = currentImgSrc
-          userInfos[chatID].characterImg
+          delete userInfos[chatID].characterImg
           localStorage.setItem("userInfos")
         }
       } else {
         element.addEventListener('error', () => {
           console.error('로드 실패: 잘못된 URL이거나 이미지 없음');
           element.src = currentImgSrc
-          userInfos[chatID].characterImg
+          delete userInfos[chatID].characterImg
           localStorage.setItem("userInfos")
         });
       }
@@ -168,7 +168,7 @@ function convertText(element) {
     const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
     const name = matches.map(m => m[1]);
-    if (validation) {
+    if (validation && userInfos[chatID]?.userName) {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
     } else {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userName)

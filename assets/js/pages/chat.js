@@ -17,9 +17,10 @@ async function chatPageLoad() {
     const [validation, userInfos] = userInfosValidationCheck(chatID)
     const currentImgSrc = chatCharacterImage.src
     if (validation) {
-        userNameInput.value = userInfos[chatID].userName
-        userInfoInput.value = userInfos[chatID].userInfo
-        chatCharacterImage.src = userInfos[chatID].characterImg
+        userNameInput.value = userInfos[chatID]?.userName || ""
+        userInfoInput.value = userInfos[chatID]?.userInfo || ""
+        const userInfoImg = userInfos[chatID]?.characterImg
+        if (userInfoImg) chatCharacterImage.src = userInfoImg
     }
 
     if (chatCharacterImage.complete) {
@@ -227,7 +228,7 @@ function convertText(text) {
     const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
     const name = matches.map(m => m[1]);
-    if (validation) {
+    if (validation && userInfos[chatID]?.userName) {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
     } else {
         textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])

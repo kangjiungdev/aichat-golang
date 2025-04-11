@@ -61,7 +61,7 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
   
         <div class="section"><h3>캐릭터 소개</h3><p style="white-space: pre-wrap;">${htmlToText(convertText(chatID, characterInfo))}</p></div>
         ${
-          pageName === "home" ? `<button id="popup-chat-button" data-character-id="${chatID}">대화 시작</button>`:
+          pageName === "home" ? `<button id="popup-chat-button" data-character-id="${characterID}">대화 시작</button>`:
           pageName === "chat-main" ? `<button id="popup-chat-button" onclick='location.href="/chat/${chatID}"'>대화 시작</button>`:
           ``
         }
@@ -92,10 +92,8 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
         const [validation, userInfos] = userInfosValidationCheck(chatID)
         if ((pageName === "chat" || pageName === "chat-main") && validation) {
           thumbImg.forEach(element => {
-              if(element.src === userInfos.characterImg) {
+              if(element.src === (userInfos[chatID]?.characterImg || thumbImg[0].src)) {
                 element.classList.add("active")
-              } else {
-                thumbImg[0].classList.add("active")
               }
           })
         } else {
@@ -117,9 +115,7 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
               const [validation, userInfos] = userInfosValidationCheck(chatID)
               if ((pageName === "chat" || pageName === "chat-main")) {
                 $(".chat-character-image, .chat-img").attr("src", this.src)
-                if (validation) {
-                  userInfos[chatID].userName,
-                  userInfos[chatID].userInfo,
+                if (validation && userInfos[chatID]?.characterImg) {
                   userInfos[chatID].characterImg = this.src
                 } else {
                   userInfos[chatID] = {
