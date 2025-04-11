@@ -1,4 +1,4 @@
-import { popup } from '../application';
+import { popup, userInfosValidationCheck } from '../application';
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 const deleteChatBtn = document.getElementsByClassName("delete-chat")
@@ -6,11 +6,11 @@ const userName = document.querySelectorAll(".chat-footer-username")
 const chatCharacterImage = document.querySelectorAll(".chat-img")
 const chatPreview = document.querySelectorAll(".chat-preview")
 
-const userInfos = JSON.parse(localStorage.getItem("userInfos"))
 
 userName.forEach(element => {
   const chatID = element.closest(".chat-card").dataset.chatId
-  if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+  const [validation, userInfos] = userInfosValidationCheck(chatID)
+  if (validation) {
       element.innerText = userInfos[chatID].userName
   }
 })
@@ -18,7 +18,8 @@ userName.forEach(element => {
 chatCharacterImage.forEach(element => {
     const currentImgSrc = element.src
     const chatID = element.closest(".chat-card").dataset.chatId
-    if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+    const [validation, userInfos] = userInfosValidationCheck(chatID)
+    if (validation) {
         element.src = userInfos[chatID].characterImg
     }
 
@@ -26,11 +27,15 @@ chatCharacterImage.forEach(element => {
         if (chatCharacterImage.naturalWidth === 0) {
           console.error('로드 실패: 이미지가 없거나 깨졌음');
           element.src = currentImgSrc
+          userInfos[chatID].characterImg
+          localStorage.setItem("userInfos")
         }
       } else {
         element.addEventListener('error', () => {
           console.error('로드 실패: 잘못된 URL이거나 이미지 없음');
           element.src = currentImgSrc
+          userInfos[chatID].characterImg
+          localStorage.setItem("userInfos")
         });
       }
 })
@@ -48,9 +53,11 @@ if (deleteChatBtn.length > 0) {
                     if (chatCard) {
                         chatCard.remove();
                       }
-                    let userInfos = JSON.parse(localStorage.getItem("userInfos")) || {};
-                    delete userInfos[chatID];
-                    localStorage.setItem("userInfos", JSON.stringify(userInfos));
+                      const [validation, userInfos] = userInfosValidationCheck(chatID)
+                    if (validation) {
+                      delete userInfos[chatID];
+                      localStorage.setItem("userInfos", JSON.stringify(userInfos));
+                    }
                 } else {
                     const res = await req.text()
                     console.error(res)
@@ -103,10 +110,6 @@ function removeBlurOverlay() {
   }
 }
 
-function htmlToText(text) {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-}
-
 function parseAndDisplay(element) {
     const text = convertText(element);
     const regex = /\*([^*]+)\*|([^*]+)/g;
@@ -155,25 +158,17 @@ function parseAndDisplay(element) {
     element.appendChild(container);
 }
 
-function popUpConvertText(text) {
-  const matches = [...text.matchAll(/{{(.*?)}}/g)];
-  let textConverted;
-  const name = matches.map(m => m[1]);
-      textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
-  return textConverted
-}
-
 function convertText(element) {
     const chatCard = element.closest(".chat-card");
     const chatID = chatCard.dataset.chatId
     const text = element.innerText
     const charName = chatCard.dataset.charName
     const userName = chatCard.dataset.userName
-    const userInfos = JSON.parse(localStorage.getItem("userInfos"))
+    const [validation, userInfos] = userInfosValidationCheck(chatID)
     const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
     const name = matches.map(m => m[1]);
-    if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+    if (validation) {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
     } else {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userName)

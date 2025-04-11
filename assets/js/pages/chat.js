@@ -1,9 +1,8 @@
-import { popup } from '../application';
+import { popup, userInfosValidationCheck } from '../application';
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 const chatID = window.location.pathname.split("/")[2]
 let isSubmitting = false
-
 
 const aiReqForm = document.getElementById("ai-req-form")
 const chatBox = document.getElementById("chat-box")
@@ -15,9 +14,9 @@ const firstMessageOfCharacter = document.getElementById("first-message")
 const chatCharacterImage = document.querySelector(".chat-character-image")
 
 async function chatPageLoad() {
+    const [validation, userInfos] = userInfosValidationCheck(chatID)
     const currentImgSrc = chatCharacterImage.src
-    const userInfos = JSON.parse(localStorage.getItem("userInfos"))
-    if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+    if (validation) {
         userNameInput.value = userInfos[chatID].userName
         userInfoInput.value = userInfos[chatID].userInfo
         chatCharacterImage.src = userInfos[chatID].characterImg
@@ -224,11 +223,11 @@ function createChatBlock(chatContents, who) {
 }
 
 function convertText(text) {
-    const userInfos = JSON.parse(localStorage.getItem("userInfos"))
+    const [validation, userInfos] = userInfosValidationCheck(chatID)
     const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
     const name = matches.map(m => m[1]);
-    if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+    if (validation) {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
     } else {
         textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
@@ -295,13 +294,15 @@ async function deleteReq() {
 
 function storageSetEvent(element) {
     element.addEventListener("change", function() {
-        let userInfos = JSON.parse(localStorage.getItem("userInfos")) || {};
-        userInfos[chatID] = {
-            userName: userNameInput.value,
-            userInfo: userInfoInput.value,
-            characterImg: chatCharacterImage.src
+        const [validation, userInfos] = userInfosValidationCheck(chatID)
+        if(validation) {
+            userInfos[chatID] = {
+                userName: userNameInput.value,
+                userInfo: userInfoInput.value,
+                characterImg: chatCharacterImage.src
+            }
+            localStorage.setItem("userInfos", JSON.stringify(userInfos));
         }
-        localStorage.setItem("userInfos", JSON.stringify(userInfos));
     })
 }
 

@@ -23,7 +23,6 @@ $(document).on("click", "#popup-chat-button", async function (event) {
     }
 });
 
-
 $(document).on("click", function (event) {
     const $popup = $(".character-popup");
   
@@ -36,19 +35,6 @@ $(document).on("click", function (event) {
     }
 });
 
-
-
-function convertText(text) {
-    const matches = [...text.matchAll(/{{(.*?)}}/g)];
-    let textConverted;
-    const name = matches.map(m => m[1]);
-    textConverted = htmlToText(text.replaceAll(`{{${name[0]}}}`, name[0]))
-    return textConverted
-}
-
-function htmlToText(text) {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-}
 
 // blur 오버레이 추가
 function showBlurOverlay() {

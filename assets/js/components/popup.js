@@ -1,3 +1,5 @@
+import { userInfosValidationCheck } from "../application"
+
 export async function createPopUp(csrfToken, characterID, chatID, userNameInput, userInfoInput, pageName) {
   let res
       try {
@@ -83,14 +85,24 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       `
       characterInfoDiv.classList.add("character-popup")
       document.body.appendChild(characterInfoDiv)
+
       const thumbImg = document.querySelectorAll(".thumb")
+
       if(!document.querySelector(".active")) {
+        const [validation, userInfos] = userInfosValidationCheck(chatID)
+        if ((pageName === "chat" || pageName === "chat-main") && validation) {
           thumbImg.forEach(element => {
-              if(pageName === "chat" && document.querySelector(".chat-character-image").src === element.src) {
-                  element.classList.add("active")
+              if(element.src === userInfos.characterImg) {
+                element.classList.add("active")
+              } else {
+                thumbImg[0].classList.add("active")
               }
           })
+        } else {
+          thumbImg[0].classList.add("active")
+        }
       }
+      
       characterInfoDiv.style.display = "block";
       document.querySelector(".container").classList.add("blurred");
       thumbImg.forEach(element => {
@@ -102,13 +114,17 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
               activeElement.classList.remove("active")
               this.classList.add("active")
               document.querySelector(".character-image").src = this.src
-              if (pageName === "chat") {
-                document.querySelector(".chat-character-image").src = this.src
-                const userInfos = JSON.parse(localStorage.getItem("userInfos")) || {};
-                userInfos[chatID] = {
-                    userName: userNameInput.value,
-                    userInfo: userInfoInput.value,
+              const [validation, userInfos] = userInfosValidationCheck(chatID)
+              if ((pageName === "chat" || pageName === "chat-main")) {
+                $(".chat-character-image, .chat-img").attr("src", this.src)
+                if (validation) {
+                  userInfos[chatID].userName,
+                  userInfos[chatID].userInfo,
+                  userInfos[chatID].characterImg = this.src
+                } else {
+                  userInfos[chatID] = {
                     characterImg: this.src
+                  }
                 }
                 localStorage.setItem("userInfos", JSON.stringify(userInfos));
               }
@@ -134,7 +150,7 @@ function htmlToText(text) {
 }
 
 function convertText(chatID, text) {
-  const userInfos = JSON.parse(localStorage.getItem("userInfos"))
+  const userInfos = JSON.parse(localStorage.getItem("userInfos")) || {}
   const matches = [...text.matchAll(/{{(.*?)}}/g)];
   let textConverted;
   const name = matches.map(m => m[1]);
