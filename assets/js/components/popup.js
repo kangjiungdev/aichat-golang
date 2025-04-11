@@ -2,6 +2,7 @@ import { userInfosValidationCheck } from "../application"
 
 export async function createPopUp(csrfToken, characterID, chatID, userNameInput, userInfoInput, pageName) {
   let res
+  const [validation, userInfos] = userInfosValidationCheck(chatID)
       try {
         const req = await fetch("/get-character-data", {
           method:"POST",
@@ -112,7 +113,6 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
               activeElement.classList.remove("active")
               this.classList.add("active")
               document.querySelector(".character-image").src = this.src
-              const [validation, userInfos] = userInfosValidationCheck(chatID)
               if ((pageName === "chat" || pageName === "chat-main")) {
                 $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).attr("src", this.src)
                 if (validation && userInfos[chatID]?.characterImg) {
@@ -129,7 +129,6 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
 
       if (pageName === "chat") {
         const popupUserNameInput = document.getElementById("popup-input-user-name")
-        const [validation, userInfos] = userInfosValidationCheck(chatID)
         
         popupUserNameInput.addEventListener("change", function(){
         userNameInput.value = this.value
@@ -149,11 +148,11 @@ function htmlToText(text) {
 }
 
 function convertText(chatID, text) {
-  const userInfos = JSON.parse(localStorage.getItem("userInfos")) || {}
+  const [validation, userInfos] = userInfosValidationCheck(chatID)
   const matches = [...text.matchAll(/{{(.*?)}}/g)];
   let textConverted;
   const name = matches.map(m => m[1]);
-  if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
+  if (validation && userInfos[chatID]?.userName) {
       textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
   } else {
       textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
