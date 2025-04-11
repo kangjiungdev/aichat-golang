@@ -79,6 +79,7 @@ chatPreview.forEach(element => {
 $(".character-info-btn").on("click", async function() {
   const characterID = $(this).closest(".chat-card").data("characterId")
   const chatID = $(this).closest(".chat-card").data("chatId")
+  console.log(chatID)
   popup.createPopUp(csrfToken, characterID, chatID, null, null, "chat-main")
   showBlurOverlay()
 })

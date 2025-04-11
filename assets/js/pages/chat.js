@@ -17,7 +17,9 @@ async function chatPageLoad() {
     const [validation, userInfos] = userInfosValidationCheck(chatID)
     const currentImgSrc = chatCharacterImage.src
     if (validation) {
-        userNameInput.value = userInfos[chatID]?.userName || ""
+        if (userInfos[chatID]?.userName) {
+            userNameInput.value = userInfos[chatID].userName;
+        }
         userInfoInput.value = userInfos[chatID]?.userInfo || ""
         const userInfoImg = userInfos[chatID]?.characterImg
         if (userInfoImg) chatCharacterImage.src = userInfoImg

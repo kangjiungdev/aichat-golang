@@ -74,7 +74,7 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       <h4>내 정보</h4>
       <label for="popup-input-user-name">
         <p>이름</p>
-        <input type="text" placeholder="캐릭터에게 내 이름을 알려주세요." id="popup-input-user-name" class="popup-input-user-name input-box" value="${userNameInput.value}">
+        <input type="text" placeholder="캐릭터에게 내 이름을 알려주세요." id="popup-input-user-name" class="popup-input-user-name input-box" value='${userNameInput.value}'>
       </label>
       <label for="popup-input-user-info">
         <p>소개</p>
@@ -114,7 +114,7 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
               document.querySelector(".character-image").src = this.src
               const [validation, userInfos] = userInfosValidationCheck(chatID)
               if ((pageName === "chat" || pageName === "chat-main")) {
-                $(".chat-character-image, .chat-img").attr("src", this.src)
+                $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).attr("src", this.src)
                 if (validation && userInfos[chatID]?.characterImg) {
                   userInfos[chatID].characterImg = this.src
                 } else {
@@ -128,9 +128,12 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       })
 
       if (pageName === "chat") {
-        document.getElementById("popup-input-user-name").addEventListener("change", function(){
-          userNameInput.value = this.value
-          userNameInput.dispatchEvent(new Event("change"));
+        const popupUserNameInput = document.getElementById("popup-input-user-name")
+        const [validation, userInfos] = userInfosValidationCheck(chatID)
+        
+        popupUserNameInput.addEventListener("change", function(){
+        userNameInput.value = this.value
+        userNameInput.dispatchEvent(new Event("change"));
         })
         document.getElementById("popup-input-user-info").addEventListener("change", function(){
           userInfoInput.value = this.value
