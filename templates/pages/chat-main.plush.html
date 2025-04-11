@@ -2,8 +2,8 @@
   <%= for (chat) in chats { %>
       <%= for (character) in characters { %>
         <%= if (character.ID == chat.CharacterID) { %>
-          <div class="chat-card">
-            <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="chat-img" data-chat-id="<%= chat.ID %>" data-img='<%= toJSON(character.CharacterAssets) %>'>
+          <div class="chat-card" data-chat-id="<%= chat.ID %>" data-character-id="<%= chat.CharacterID %>" data-user-name="<%= user.Name %>" data-char-name="<%= character.CharacterName %>">
+            <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="chat-img">
             <div class="chat-body">
               <div class="chat-header">
                 <h4 class="chat-character-name"><%= character.CharacterName %></h4>
@@ -12,7 +12,7 @@
                   <span>🤍</span>
                 </div>
               </div>
-              <p class="chat-preview" style="font-size: 14px;" data-char-name="<%= character.CharacterName %>" data-user-name="<%= user.Name %>" data-chat-id="<%= chat.ID %>">
+              <p class="chat-preview" style="font-size: 14px;">
                 <%= if (len(chat.AiMessage) > 0) { %>
                   <%= chat.AiMessage[len(chat.AiMessage) - 1] %>
                 <% } else { %>
@@ -20,16 +20,13 @@
                 <% } %>
               </p>
               <div class="chat-buttons">
-                <button class="character-info-btn"
-                data-chat-id="<%= chat.ID %>"
-                data-character-id="<%= character.ID %>"
-                >캐릭터 정보</button>
+                <button class="character-info-btn">캐릭터 정보</button>
                 <button onclick="location.href='/chat/<%= chat.ID %>'">대화 시작</button>
-                <button class="delete-chat" value="<%= chat.ID %>">대화 삭제</button>
+                <button class="delete-chat">대화 삭제</button>
               </div>
               <div class="chat-footer">
                 <span><%= chat.UpdatedAt.Format("2006-01-02 15:04") %></span>
-                <span class="chat-footer-username" data-chat-id="<%= chat.ID %>"><%= user.Name %></span>
+                <span class="chat-footer-username"><%= user.Name %></span>
               </div>
             </div>
           </div>

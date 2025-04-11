@@ -149,11 +149,30 @@ func GetCharacterData(c buffalo.Context) error {
 		fmt.Println(err)
 	}
 
+	var userMessageNumber struct {
+		Count int `db:"count"`
+	}
+	err = tx.RawQuery("SELECT SUM(JSON_LENGTH(user_message)) AS count FROM chats WHERE character_id = ?", characterID).First(&userMessageNumber)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
+	}
+
+	var characterUserNumber struct {
+		Count int `db:"count"`
+	}
+	err = tx.RawQuery("SELECT COUNT(DISTINCT user_id) AS count FROM chats").First(&characterUserNumber)
+	if err != nil {
+		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
+	}
+
 	creator := &models.User{}
 	err = tx.Find(creator, character.CreatorID)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
+
+	messageKoreanNumber := FormatKoreanNumber(userMessageNumber.Count)
+	characterUserKoreanNumber := FormatKoreanNumber(characterUserNumber.Count)
 
 	characterInfoJson := struct {
 		CreatorID            string             `json:"creator_id"`
@@ -163,6 +182,8 @@ func GetCharacterData(c buffalo.Context) error {
 		WorldView            string             `json:"world_view"`
 		FirstMsgCharacter    string             `json:"first_msg_character"`
 		CharacterAssets      models.StringArray `json:"character_assets"`
+		ChatNumber           string             `json:"chat_number"`
+		CharacterUserNumber  string             `json:"character_user_number"`
 	}{
 		CreatorID:            creator.UserID,
 		CharacterName:        character.CharacterName,
@@ -171,7 +192,20 @@ func GetCharacterData(c buffalo.Context) error {
 		WorldView:            ReplaceMessages(character.WorldView, userName, character.CharacterName),
 		FirstMsgCharacter:    ReplaceMessages(character.FirstMsgCharacter, userName, character.CharacterName),
 		CharacterAssets:      character.CharacterAssets,
+		ChatNumber:           messageKoreanNumber,
+		CharacterUserNumber:  characterUserKoreanNumber,
 	}
 
 	return c.Render(http.StatusOK, r.JSON(characterInfoJson))
+}
+
+func FormatKoreanNumber(n int) string {
+	switch {
+	case n >= 10000:
+		return fmt.Sprintf("%.1f만", float64(n)/10000)
+	case n >= 1000:
+		return fmt.Sprintf("%d천", n/1000)
+	default:
+		return fmt.Sprintf("%d", n)
+	}
 }

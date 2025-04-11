@@ -15,6 +15,7 @@ const firstMessageOfCharacter = document.getElementById("first-message")
 const chatCharacterImage = document.querySelector(".chat-character-image")
 
 async function chatPageLoad() {
+    const currentImgSrc = chatCharacterImage.src
     const userInfos = JSON.parse(localStorage.getItem("userInfos"))
     if (userInfos?.[chatID] && typeof userInfos[chatID] === "object") {
         userNameInput.value = userInfos[chatID].userName
@@ -22,17 +23,27 @@ async function chatPageLoad() {
         chatCharacterImage.src = userInfos[chatID].characterImg
     }
 
-    const imgSrcWhenLoadErr = chatCharacterImage.dataset.img
-
     if (chatCharacterImage.complete) {
         if (chatCharacterImage.naturalWidth === 0) {
           console.error('로드 실패: 이미지가 없거나 깨졌음');
-          chatCharacterImage.src = `/${imgSrcWhenLoadErr}`
+          chatCharacterImage.src = currentImgSrc
+          userInfos[chatID] = {
+            userName: userNameInput.value,
+            userInfo: userInfoInput.value,
+            characterImg: currentImgSrc
+        }
+        localStorage.setItem("userInfos", JSON.stringify(userInfos));
         }
       } else {
         chatCharacterImage.addEventListener('error', () => {
           console.error('로드 실패: 잘못된 URL이거나 이미지 없음');
-          chatCharacterImage.src = `/${imgSrcWhenLoadErr}`
+          chatCharacterImage.src = currentImgSrc
+          userInfos[chatID] = {
+            userName: userNameInput.value,
+            userInfo: userInfoInput.value,
+            characterImg: currentImgSrc
+        }
+        localStorage.setItem("userInfos", JSON.stringify(userInfos));
         });
       }
 
@@ -73,117 +84,8 @@ async function chatPageLoad() {
 chatPageLoad()
 
 navCharacterInfoButton.addEventListener("click", async function() {
-    let res
-    try {
-      const req = await fetch("/get-character-data", {
-        method:"POST",
-        headers: {"Content-Type": "text/plain", "X-CSRF-Token":csrfToken},
-        body: this.dataset.characterId
-      })
-      res = await req.json()
-    } catch (e) {
-      console.error(e)
-      return
-    }
-    const creatorUserID = res["creator_id"]
-    const characterName = res["character_name"]
-    const imgsRoute = res["character_assets"]
-    const characterInfo = res["character_info"]
-    const characterWorldView = res["world_view"]
-    const characterOnelineInfo = res["character_oneline_info"]
+    popup.createPopUp(csrfToken, this.dataset.characterId, chatID, userNameInput, userInfoInput, "chat")
 
-    const characterInfoDiv = document.createElement("div")
-    characterInfoDiv.innerHTML = `
-    <div class="popup-container chat-popup-container">
-    <!-- 좌측: 캐릭터 이미지 및 정보 -->
-    <div class="popup-left">
-      <div class="character-header">
-      <h3 class="popup-character-name">${htmlToText(characterName)}</h3>
-        <img src="${chatCharacterImage.src}" class="character-image" alt="캐릭터 이미지" style="width: 351.297px; height: 526.938px; object-fit: cover;">
-        <div class="character-meta">
-          <a href="/user/${creatorUserID}" class="creator">@${creatorUserID}</a>
-          <span class="views">8.1천</span>
-          <span class="likes">444</span>
-        </div>
-      </div>
-      
-      <!-- 썸네일 리스트 -->
-      <div class="thumbnail-wrapper">
-        <div class="thumbnail-row">
-          ${imgsRoute.map(element => {
-            return `<img src="/${element}" class="thumb">`;
-           }).join('')}
-        </div>
-        <div class="thumb-scroll-btn right-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </div>
-      </div>
-
-
-      <div class="popup-oneline-info">${htmlToText(characterOnelineInfo)}</div>
-    </div>
-
-    <!-- 우측: 세계관 + 캐릭터 소개 -->
-    <div class="popup-right">
-      <div class="section"><h3>세계관</h3><p>${htmlToText(convertText(characterWorldView))}</p></div>
-
-      <div class="section"><h3>캐릭터 소개</h3><p style="white-space: pre-wrap;">${htmlToText(convertText(characterInfo))}</p></div>
-    </div>
-  </div>
-
-  <!-- 하단: 내 정보 -->
-  <div class="popup-footer">
-    <h4>내 정보</h4>
-            <label for="popup-input-user-name">
-            <p>이름</p>
-            <input type="text" placeholder="캐릭터에게 내 이름을 알려주세요." id="popup-input-user-name" class="popup-input-user-name input-box" value="${userNameInput.value}">
-        </label>
-        <label for="popup-input-user-info">
-            <p>소개</p>
-            <textarea placeholder="캐릭터에게 나에 대해 알려주세요." id="popup-input-user-info" class="popup-input-user-info input-box">${userInfoInput.value}</textarea>
-        </label>
-  </div>
-    `
-    characterInfoDiv.classList.add("character-popup")
-    document.body.appendChild(characterInfoDiv)
-    const thumbImg = document.querySelectorAll(".thumb")
-    if(!document.querySelector(".active")) {
-        thumbImg.forEach(element => {
-            if(chatCharacterImage.src === element.src) {
-                element.classList.add("active")
-            }
-        })
-    }
-    characterInfoDiv.style.display = "block";
-    document.querySelector(".container").classList.add("blurred");
-    thumbImg.forEach(element => {
-        element.addEventListener("click", function() {
-            if(this.classList.contains("active")) {
-                return
-            }
-            const activeElement = document.querySelector(".active")
-            activeElement.classList.remove("active")
-            this.classList.add("active")
-            document.querySelector(".character-image").src = this.src
-            chatCharacterImage.src = this.src
-            let userInfos = JSON.parse(localStorage.getItem("userInfos")) || {};
-            userInfos[chatID] = {
-                userName: userNameInput.value,
-                userInfo: userInfoInput.value,
-                characterImg: this.src
-            }
-            localStorage.setItem("userInfos", JSON.stringify(userInfos));
-        })
-    })
-    document.querySelector(".popup-input-user-name").addEventListener("change", function() {
-        userNameInput.value = this.value
-        userNameInput.dispatchEvent(new Event('change'));
-    })
-    document.querySelector(".popup-input-user-info").addEventListener("change", function() {
-        userInfoInput.value = this.value
-        userInfoInput.dispatchEvent(new Event('change'));
-    })
-    popup.bindScrollEvent()
     showBlurOverlay()
 })
 
@@ -332,10 +234,6 @@ function convertText(text) {
         textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
     }
     return textConverted
-}
-
-function htmlToText(text) {
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }
 
 function actionChat(chatContents) {
