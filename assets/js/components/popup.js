@@ -89,8 +89,9 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
 
       const thumbImg = document.querySelectorAll(".thumb")
 
+      document.querySelector(".character-image").src = userInfos[chatID]?.characterImg || thumbImg[0].src
+
       if(!document.querySelector(".active")) {
-        const [validation, userInfos] = userInfosValidationCheck(chatID)
         if ((pageName === "chat" || pageName === "chat-main") && validation) {
           thumbImg.forEach(element => {
               if(element.src === (userInfos[chatID]?.characterImg || thumbImg[0].src)) {
@@ -106,6 +107,7 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       document.querySelector(".container").classList.add("blurred");
       thumbImg.forEach(element => {
           element.addEventListener("click", function() {
+            const [validation, userInfos] = userInfosValidationCheck(chatID)
               if(this.classList.contains("active")) {
                   return
               }
