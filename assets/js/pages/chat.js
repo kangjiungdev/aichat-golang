@@ -298,13 +298,16 @@ async function deleteReq() {
 function storageSetEvent(element) {
     element.addEventListener("change", function() {
         const [validation, userInfos] = userInfosValidationCheck(chatID)
-        if(validation) {
-            userInfos[chatID] = {
-                userName: userNameInput.value,
-                userInfo: userInfoInput.value,
-                characterImg: chatCharacterImage.src
-            }
-            localStorage.setItem("userInfos", JSON.stringify(userInfos));
+        userInfos[chatID] = {
+            ...userInfos[chatID],
+            userName: userNameInput.value,
+            userInfo: userInfoInput.value,
+        }
+        localStorage.setItem("userInfos", JSON.stringify(userInfos));
+        if (!userInfos[chatID].characterImg) {
+            document.querySelector(".active").classList.remove("active")
+            document.querySelectorAll(".thumb")[0].classList.add("active")
+            document.querySelector(".character-image").src = document.querySelectorAll(".thumb")[0].src
         }
     })
 }
