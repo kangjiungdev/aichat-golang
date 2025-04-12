@@ -12,13 +12,13 @@
 .ai-chat-div {
   display: flex;
   width: 100%;
-  height: 100%;
+  height: 92.7vh;
 }
 
 .right-div {
   position: relative;
   width: 100vw;
-  height: 92.7vh;
+  height: 100%;
   margin-left: 1%;
   background-color: #343A40;
 }
@@ -192,7 +192,7 @@
 }
 
 .chat-main {
-  padding-top: 40px;
+  padding: 40px 0;
   .chat-main-header {
     display: block;
     padding: 24px 0px 0 24px;
@@ -207,7 +207,7 @@
   .chat-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* 한 줄에 3개 카드 */
-    gap: 24px;
+    gap: 28px;
     padding: 24px;
     max-width: 1440px;
     margin: 0 auto;

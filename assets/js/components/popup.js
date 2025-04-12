@@ -115,13 +115,11 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
               document.querySelector(".character-image").src = this.src
               if ((pageName === "chat" || pageName === "chat-main")) {
                 $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).attr("src", this.src)
-                if (validation && userInfos[chatID]?.characterImg) {
-                  userInfos[chatID].characterImg = this.src
-                } else {
-                  userInfos[chatID] = {
-                    characterImg: this.src
-                  }
-                }
+                userInfos[chatID] = {
+                  userName: userNameInput.value,
+                  userInfo: userInfoInput.value,
+                  characterImg: this.src
+                };
                 localStorage.setItem("userInfos", JSON.stringify(userInfos));
               }
           })
