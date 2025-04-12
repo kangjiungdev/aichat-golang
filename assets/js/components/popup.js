@@ -116,10 +116,9 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
               if ((pageName === "chat" || pageName === "chat-main")) {
                 $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).attr("src", this.src)
                 userInfos[chatID] = {
-                  userName: userNameInput.value,
-                  userInfo: userInfoInput.value,
+                  ...userInfos[chatID],
                   characterImg: this.src
-                };
+                }
                 localStorage.setItem("userInfos", JSON.stringify(userInfos));
               }
           })
