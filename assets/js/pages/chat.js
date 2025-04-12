@@ -304,10 +304,11 @@ function storageSetEvent(element) {
             userInfo: userInfoInput.value,
         }
         localStorage.setItem("userInfos", JSON.stringify(userInfos));
-        if (!userInfos[chatID].characterImg) {
+        const firstThumb = document.querySelectorAll(".thumb")[0]
+        if (!userInfos[chatID].characterImg && !firstThumb.classList.contains("active")) {
             document.querySelector(".active").classList.remove("active")
-            document.querySelectorAll(".thumb")[0].classList.add("active")
-            document.querySelector(".character-image").src = document.querySelectorAll(".thumb")[0].src
+            firstThumb.classList.add("active")
+            document.querySelector(".character-image").src = firstThumb.src
         }
     })
 }
