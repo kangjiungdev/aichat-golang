@@ -2,7 +2,7 @@ import { userInfosValidationCheck } from "../application"
 
 export async function createPopUp(csrfToken, characterID, chatID, userNameInput, userInfoInput, pageName) {
   let res
-  const [validation, userInfos] = userInfosValidationCheck(chatID)
+  const userInfos = userInfosValidationCheck(chatID)
       try {
         const req = await fetch("/get-character-data", {
           method:"POST",
@@ -92,7 +92,7 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       document.querySelector(".character-image").src = userInfos[chatID]?.characterImg || thumbImg[0].src
 
       if(!document.querySelector(".active")) {
-        if ((pageName === "chat" || pageName === "chat-main") && validation) {
+        if ((pageName === "chat" || pageName === "chat-main")) {
           thumbImg.forEach(element => {
               if(element.src === (userInfos[chatID]?.characterImg || thumbImg[0].src)) {
                 element.classList.add("active")
@@ -107,7 +107,7 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       document.querySelector(".container").classList.add("blurred");
       thumbImg.forEach(element => {
           element.addEventListener("click", function() {
-            const [validation, userInfos] = userInfosValidationCheck(chatID)
+            const userInfos = userInfosValidationCheck(chatID)
               if(this.classList.contains("active")) {
                   return
               }
@@ -118,7 +118,8 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
               if ((pageName === "chat" || pageName === "chat-main")) {
                 $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).attr("src", this.src)
                 userInfos[chatID] = {
-                  ...userInfos[chatID],
+                  userName: userNameInput.value,
+                  userInfo: userInfoInput.value,
                   characterImg: this.src
                 }
                 localStorage.setItem("userInfos", JSON.stringify(userInfos));
@@ -147,11 +148,11 @@ function htmlToText(text) {
 }
 
 function convertText(chatID, text) {
-  const [validation, userInfos] = userInfosValidationCheck(chatID)
+  const userInfos = userInfosValidationCheck(chatID)
   const matches = [...text.matchAll(/{{(.*?)}}/g)];
   let textConverted;
   const name = matches.map(m => m[1]);
-  if (validation && userInfos[chatID]?.userName) {
+  if (userInfos[chatID]?.userName) {
       textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
   } else {
       textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])

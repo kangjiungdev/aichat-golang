@@ -25,10 +25,7 @@ export function userInfosValidationCheck(chatID) {
       console.error(`userInfos["${chatID}"]의 타입이 object가 아닙니다. 해당 항목을 제거합니다.`);
       delete userInfos[chatID];
       localStorage.setItem("userInfos", JSON.stringify(userInfos));
-      return [false, userInfos];
     }
-
-    return [true, userInfos];
 
   } catch (e) {
     console.warn("userInfos의 JSON 파싱에 실패했습니다. 복구 가능한 항목을 찾아 다시 저장합니다.");
@@ -65,14 +62,14 @@ export function userInfosValidationCheck(chatID) {
         localStorage.setItem("userInfos", JSON.stringify(userInfos));
       }
 
-      return [false, userInfos];
     } catch {
       userInfos = {}
       console.error("복구된 데이터도 JSON 파싱에 실패했습니다. userInfos를 초기화합니다.");
       localStorage.setItem("userInfos", JSON.stringify(userInfos));
-      return [false, userInfos];
+      
     }
   }
+  return userInfos;
 }
 
 

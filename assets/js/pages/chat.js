@@ -14,16 +14,12 @@ const firstMessageOfCharacter = document.getElementById("first-message")
 const chatCharacterImage = document.querySelector(".chat-character-image")
 
 async function chatPageLoad() {
-    const [validation, userInfos] = userInfosValidationCheck(chatID)
+    const userInfos = userInfosValidationCheck(chatID)
     const currentImgSrc = chatCharacterImage.src
-    if (validation) {
-        if (userInfos[chatID]?.userName) {
-            userNameInput.value = userInfos[chatID].userName;
-        }
-        userInfoInput.value = userInfos[chatID]?.userInfo || ""
-        const userInfoImg = userInfos[chatID]?.characterImg
-        if (userInfoImg) chatCharacterImage.src = userInfoImg
-    }
+    if(userInfos[chatID]?.userName) userNameInput.value = userInfos[chatID].userName
+    userInfoInput.value = userInfos[chatID]?.userInfo || ""
+    const userInfoImg = userInfos[chatID]?.characterImg
+    if (userInfoImg) chatCharacterImage.src = userInfoImg
 
     if (chatCharacterImage.complete) {
         if (chatCharacterImage.naturalWidth === 0) {
@@ -226,11 +222,11 @@ function createChatBlock(chatContents, who) {
 }
 
 function convertText(text) {
-    const [validation, userInfos] = userInfosValidationCheck(chatID)
+    const userInfos = userInfosValidationCheck(chatID)
     const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
     const name = matches.map(m => m[1]);
-    if (validation && userInfos[chatID]?.userName) {
+    if (userInfos[chatID]?.userName) {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
     } else {
         textConverted = text.replaceAll(`{{${name[0]}}}`, name[0])
@@ -297,19 +293,17 @@ async function deleteReq() {
 
 function storageSetEvent(element) {
     element.addEventListener("change", function() {
-        const [validation, userInfos] = userInfosValidationCheck(chatID)
+        const userInfos = userInfosValidationCheck(chatID)
         userInfos[chatID] = {
             ...userInfos[chatID],
             userName: userNameInput.value,
             userInfo: userInfoInput.value,
         }
-        localStorage.setItem("userInfos", JSON.stringify(userInfos));
         const firstThumb = document.querySelectorAll(".thumb")[0]
         if (!userInfos[chatID].characterImg && !firstThumb.classList.contains("active")) {
-            document.querySelector(".active").classList.remove("active")
-            firstThumb.classList.add("active")
-            document.querySelector(".character-image").src = firstThumb.src
+            userInfos[chatID].characterImg = document.querySelector(".character-image").src
         }
+        localStorage.setItem("userInfos", JSON.stringify(userInfos));
     })
 }
 
