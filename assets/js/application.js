@@ -67,8 +67,10 @@ export function userInfosValidationCheck(chatID) {
 
       return [false, userInfos];
     } catch {
+      userInfos = {}
       console.error("복구된 데이터도 JSON 파싱에 실패했습니다. userInfos를 초기화합니다.");
-      return [false, null];
+      localStorage.setItem("userInfos", JSON.stringify(userInfos));
+      return [false, userInfos];
     }
   }
 }
