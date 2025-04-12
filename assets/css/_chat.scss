@@ -18,7 +18,7 @@
 .right-div {
   position: relative;
   width: 100vw;
-  height: 92.5vh;
+  height: 92.7vh;
   margin-left: 1%;
   background-color: #343A40;
 }
@@ -187,17 +187,32 @@
 
 .chat-character-image {
   width: 550.4px;
-  height: 855px;
+  height: 100%;
   object-fit: cover;
 }
 
-.chat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 한 줄에 3개 카드 */
-  gap: 24px;
-  padding: 24px;
-  max-width: 1440px;
-  margin: 0 auto;
+.chat-main {
+  padding-top: 40px;
+  .chat-main-header {
+    display: block;
+    padding: 24px 0px 0 24px;
+    h2 {
+      font-size: 24px;
+      color: white;
+      font-family: $font-ui;
+      font-weight: 600;
+    }
+  }
+  
+  .chat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 한 줄에 3개 카드 */
+    gap: 24px;
+    padding: 24px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
 }
 
 .chat-card {
