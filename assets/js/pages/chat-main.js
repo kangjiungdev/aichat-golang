@@ -79,7 +79,6 @@ chatPreview.forEach(element => {
 $(".character-info-btn").on("click", async function() {
   const characterID = $(this).closest(".chat-card").data("characterId")
   const chatID = $(this).closest(".chat-card").data("chatId")
-  console.log(chatID)
   popup.createPopUp(csrfToken, characterID, chatID, null, null, "chat-main")
   showBlurOverlay()
 })
@@ -126,25 +125,13 @@ function parseAndDisplay(element) {
       }
     }
   
-    // 2. 글자 수 제한 + 색상/클래스 처리
-    const maxLength = 63;
+    // 2. 색상/클래스 처리
     let currentLength = 0;
     const container = document.createElement("span");
   
     for (const chunk of txtArray) {
       const content = chunk.act || chunk.word;
       const nextLength = currentLength + [...content].length;
-  
-      if (nextLength > maxLength) {
-        const remaining = maxLength - currentLength;
-        const slice = [...content].slice(0, remaining).join('');
-        const span = document.createElement("span");
-        span.innerText = slice + "...";
-        span.classList.add("chat-main-span");
-        span.classList.add(chunk.act ? "ai-action-chat" : "ai-conversation-chat");
-        container.appendChild(span);
-        break;
-      }
   
       const span = document.createElement("span");
       span.innerText = content;
