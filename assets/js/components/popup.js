@@ -96,7 +96,8 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       if(pageName === "chat" || pageName === "chat-main") {
         userInfos[chatID] = userInfos[chatID] || {};
         const currentImgSrc = $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).prop("src");
-        characterImg.src = userInfos[chatID]?.characterImg
+
+        if(userInfos[chatID]?.characterImg) characterImg.src = userInfos[chatID].characterImg
         if (characterImg.complete) {
           if (characterImg.naturalWidth === 0) {
             imageLoadErrorHandling(userInfos, chatID, characterImg, currentImgSrc)
