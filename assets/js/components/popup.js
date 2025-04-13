@@ -1,5 +1,7 @@
 import { userInfosValidationCheck } from "../application"
 
+export const imageLoadErrorMessage = "이미지를 불러올 수 없습니다. 이미지가 존재하지 않거나 주소가 잘못되었습니다."
+
 export async function createPopUp(csrfToken, characterID, chatID, userNameInput, userInfoInput, pageName) {
   let res
   const userInfos = userInfosValidationCheck(chatID)
@@ -88,8 +90,36 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       document.body.appendChild(characterInfoDiv)
 
       const thumbImg = document.querySelectorAll(".thumb")
+      const characterImg = document.querySelector(".character-image")
+      
 
-      document.querySelector(".character-image").src = userInfos[chatID]?.characterImg || thumbImg[0].src
+      if(pageName === "chat" || pageName === "chat-main") {
+        const currentImgSrc = document.querySelector(".chat-character-image").src
+        characterImg.src = userInfos[chatID]?.characterImg
+        if (characterImg.complete) {
+          if (characterImg.naturalWidth === 0) {
+            console.error(imageLoadErrorMessage);
+            characterImg.src = currentImgSrc
+            userInfos[chatID].characterImg = currentImgSrc
+            const $activeThumb = $(".thumb").filter(function () {
+              return this.src === currentImgSrc; // 절대경로끼리 비교
+            });
+            $activeThumb.addClass("active")
+            localStorage.setItem("userInfos", JSON.stringify(userInfos))
+          }
+        } else {
+          characterImg.addEventListener('error', () => {
+            console.error(imageLoadErrorMessage);
+            characterImg.src = currentImgSrc
+            userInfos[chatID].characterImg = currentImgSrc
+            const $activeThumb = $(".thumb").filter(function () {
+              return this.src === currentImgSrc; // 절대경로끼리 비교
+            });
+            $activeThumb.addClass("active")
+            localStorage.setItem("userInfos", JSON.stringify(userInfos))
+          });
+        }
+      }
 
       if(!document.querySelector(".active")) {
         if ((pageName === "chat" || pageName === "chat-main")) {

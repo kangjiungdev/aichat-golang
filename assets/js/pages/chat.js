@@ -23,7 +23,7 @@ async function chatPageLoad() {
 
     if (chatCharacterImage.complete) {
         if (chatCharacterImage.naturalWidth === 0) {
-          console.error('로드 실패: 이미지가 없거나 깨졌음');
+          console.error(popup.imageLoadErrorMessage);
           chatCharacterImage.src = currentImgSrc
           userInfos[chatID] = {
             userName: userNameInput.value,
@@ -34,7 +34,7 @@ async function chatPageLoad() {
         }
       } else {
         chatCharacterImage.addEventListener('error', () => {
-          console.error('로드 실패: 잘못된 URL이거나 이미지 없음');
+          console.error(popup.imageLoadErrorMessage);
           chatCharacterImage.src = currentImgSrc
           userInfos[chatID] = {
             userName: userNameInput.value,

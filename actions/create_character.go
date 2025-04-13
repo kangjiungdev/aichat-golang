@@ -204,7 +204,7 @@ func FormatKoreanNumber(n int) string {
 	case n >= 10000:
 		return fmt.Sprintf("%.1f만", float64(n)/10000)
 	case n >= 1000:
-		return fmt.Sprintf("%d천", n/1000)
+		return fmt.Sprintf("%.1f천", float64(n)/1000)
 	default:
 		return fmt.Sprintf("%d", n)
 	}

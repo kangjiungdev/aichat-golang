@@ -9,8 +9,8 @@ const chatPreview = document.querySelectorAll(".chat-preview")
 
 userName.forEach(element => {
   const chatID = element.closest(".chat-card").dataset.chatId
-  const [validation, userInfos] = userInfosValidationCheck(chatID)
-  if (validation && userInfos[chatID]?.userName) {
+  const userInfos = userInfosValidationCheck(chatID)
+  if (userInfos[chatID]?.userName) {
       element.innerText = userInfos[chatID].userName
   }
 })
@@ -18,24 +18,25 @@ userName.forEach(element => {
 chatCharacterImage.forEach(element => {
     const currentImgSrc = element.src
     const chatID = element.closest(".chat-card").dataset.chatId
-    const [validation, userInfos] = userInfosValidationCheck(chatID)
-    if (validation && userInfos[chatID]?.characterImg) {
+    const userInfos = userInfosValidationCheck(chatID)
+    if (userInfos[chatID]?.characterImg) {
         element.src = userInfos[chatID].characterImg
     }
 
+
     if (element.complete) {
-        if (chatCharacterImage.naturalWidth === 0) {
-          console.error('로드 실패: 이미지가 없거나 깨졌음');
+        if (element.naturalWidth === 0) {
+          console.error(popup.imageLoadErrorMessage);
           element.src = currentImgSrc
           delete userInfos[chatID].characterImg
-          localStorage.setItem("userInfos")
+          localStorage.setItem("userInfos", JSON.stringify(userInfos))
         }
       } else {
         element.addEventListener('error', () => {
-          console.error('로드 실패: 잘못된 URL이거나 이미지 없음');
+          console.error(popup.imageLoadErrorMessage);
           element.src = currentImgSrc
           delete userInfos[chatID].characterImg
-          localStorage.setItem("userInfos")
+          localStorage.setItem("userInfos", JSON.stringify(userInfos))
         });
       }
 })
@@ -53,7 +54,7 @@ if (deleteChatBtn.length > 0) {
                     if (chatCard) {
                         chatCard.remove();
                       }
-                      const [validation, userInfos] = userInfosValidationCheck(chatID)
+                      const userInfos = userInfosValidationCheck(chatID)
                     if (validation) {
                       delete userInfos[chatID];
                       localStorage.setItem("userInfos", JSON.stringify(userInfos));
@@ -152,11 +153,11 @@ function convertText(element) {
     const text = element.innerText
     const charName = chatCard.dataset.charName
     const userName = chatCard.dataset.userName
-    const [validation, userInfos] = userInfosValidationCheck(chatID)
+    const userInfos = userInfosValidationCheck(chatID)
     const matches = [...text.matchAll(/{{(.*?)}}/g)];
     let textConverted;
     const name = matches.map(m => m[1]);
-    if (validation && userInfos[chatID]?.userName) {
+    if (userInfos[chatID]?.userName) {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userInfos[chatID].userName)
     } else {
         textConverted = text.replaceAll(`{{${name[0]}}}`, userName)
