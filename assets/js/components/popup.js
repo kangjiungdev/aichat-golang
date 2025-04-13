@@ -94,42 +94,40 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       
 
       if(pageName === "chat" || pageName === "chat-main") {
-        const currentImgSrc = document.querySelector(".chat-character-image").src
+        userInfos[chatID] = userInfos[chatID] || {};
+        const currentImgSrc = $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).prop("src");
         characterImg.src = userInfos[chatID]?.characterImg
         if (characterImg.complete) {
           if (characterImg.naturalWidth === 0) {
-            console.error(imageLoadErrorMessage);
-            characterImg.src = currentImgSrc
-            userInfos[chatID].characterImg = currentImgSrc
-            const $activeThumb = $(".thumb").filter(function () {
-              return this.src === currentImgSrc; // 절대경로끼리 비교
-            });
-            $activeThumb.addClass("active")
-            localStorage.setItem("userInfos", JSON.stringify(userInfos))
+            imageLoadErrorHandling(userInfos, chatID, characterImg, currentImgSrc)
           }
         } else {
-          characterImg.addEventListener('error', () => {
-            console.error(imageLoadErrorMessage);
-            characterImg.src = currentImgSrc
-            userInfos[chatID].characterImg = currentImgSrc
-            const $activeThumb = $(".thumb").filter(function () {
-              return this.src === currentImgSrc; // 절대경로끼리 비교
-            });
-            $activeThumb.addClass("active")
-            localStorage.setItem("userInfos", JSON.stringify(userInfos))
+          characterImg.addEventListener("error", (event) => {
+            imageLoadErrorHandling(userInfos, chatID, characterImg, currentImgSrc)
           });
         }
       }
 
-      if(!document.querySelector(".active")) {
-        if ((pageName === "chat" || pageName === "chat-main")) {
+
+      if (!document.querySelector(".active")) {
+        if (pageName === "chat" || pageName === "chat-main") {
+          const storedPath = new URL(userInfos[chatID]?.characterImg || "", location.origin).pathname;
+      
+          let matched = false;
           thumbImg.forEach(element => {
-              if(element.src === (userInfos[chatID]?.characterImg || thumbImg[0].src)) {
-                element.classList.add("active")
-              }
-          })
+            const thumbPath = new URL(element.src, location.origin).pathname;
+            if (thumbPath === storedPath) {
+              element.classList.add("active");
+              matched = true;
+            }
+          });
+      
+          if (!matched) {
+            thumbImg[0].classList.add("active");
+          }
+      
         } else {
-          thumbImg[0].classList.add("active")
+          thumbImg[0].classList.add("active");
         }
       }
       
@@ -148,8 +146,9 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
               if ((pageName === "chat" || pageName === "chat-main")) {
                 $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).attr("src", this.src)
                 userInfos[chatID] = {
-                  userName: userNameInput.value,
-                  userInfo: userInfoInput.value,
+                  ...userInfos[chatID],
+                  userName: userNameInput?.value,
+                  userInfo: userInfoInput?.value,
                   characterImg: this.src
                 }
                 localStorage.setItem("userInfos", JSON.stringify(userInfos));
@@ -171,6 +170,17 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
       }
 
       bindScrollEvent()
+}
+
+function imageLoadErrorHandling(userInfos, chatID, characterImg, currentImgSrc) {
+  console.error(imageLoadErrorMessage);
+  characterImg.src = currentImgSrc
+  userInfos[chatID].characterImg = currentImgSrc
+  const $activeThumb = $(".thumb").filter(function () {
+    return this.src === currentImgSrc; // 절대경로끼리 비교
+  });
+  $activeThumb.addClass("active")
+  localStorage.setItem("userInfos", JSON.stringify(userInfos))
 }
 
 function htmlToText(text) {
