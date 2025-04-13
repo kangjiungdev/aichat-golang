@@ -1,0 +1,23 @@
+.home-page-div {
+    padding: 65px 0;
+    .home-main-header {
+        display: block;
+        padding: 24px 0 0 24px;
+        h2 {
+          font-size: 24px;
+          color: white;
+          font-family: $font-ui;
+          font-weight: 600;
+        }
+    }
+}
+
+.character-div-list {
+    display: flex;
+    gap: 25px;
+    padding: 24px;
+}
+
+.home-character-div {
+    cursor: pointer;
+}

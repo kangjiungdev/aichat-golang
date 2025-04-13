@@ -152,16 +152,25 @@ func GetCharacterData(c buffalo.Context) error {
 	var userMessageNumber struct {
 		Count int `db:"count"`
 	}
-	err = tx.RawQuery("SELECT SUM(JSON_LENGTH(user_message)) AS count FROM chats WHERE character_id = ?", characterID).First(&userMessageNumber)
+	err = tx.RawQuery(`SELECT COALESCE(SUM(
+		CASE 
+			WHEN JSON_VALID(user_message) THEN JSON_LENGTH(user_message)
+			ELSE 0
+		END
+	), 0) AS count
+	FROM chats
+	WHERE character_id = ?`, characterID).First(&userMessageNumber)
 	if err != nil {
+		fmt.Println("DB 에러: " + err.Error())
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
 
 	var characterUserNumber struct {
 		Count int `db:"count"`
 	}
-	err = tx.RawQuery("SELECT COUNT(DISTINCT user_id) AS count FROM chats").First(&characterUserNumber)
+	err = tx.RawQuery("SELECT COUNT(DISTINCT user_id) AS count FROM chats WHERE character_id = ?", characterID).First(&characterUserNumber)
 	if err != nil {
+		fmt.Println("DB 에러: " + err.Error())
 		return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 	}
 
