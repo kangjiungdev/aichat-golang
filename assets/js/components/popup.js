@@ -91,12 +91,11 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
 
       const thumbImg = document.querySelectorAll(".thumb")
       const characterImg = document.querySelector(".character-image")
-      
 
       if(pageName === "chat" || pageName === "chat-main") {
         userInfos[chatID] = userInfos[chatID] || {};
         const currentImgSrc = $(`.chat-character-image, .chat-card[data-chat-id="${chatID}"] .chat-img`).prop("src");
-
+        
         if(userInfos[chatID]?.characterImg) characterImg.src = userInfos[chatID].characterImg
         if (characterImg.complete) {
           if (characterImg.naturalWidth === 0) {
@@ -174,6 +173,10 @@ export async function createPopUp(csrfToken, characterID, chatID, userNameInput,
 }
 
 function imageLoadErrorHandling(userInfos, chatID, characterImg, currentImgSrc) {
+  const activeElement = document.querySelector(".active")
+  if (activeElement) {
+    activeElement.classList.remove("active")
+  }
   console.error(imageLoadErrorMessage);
   characterImg.src = currentImgSrc
   userInfos[chatID].characterImg = currentImgSrc
