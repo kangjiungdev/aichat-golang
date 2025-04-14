@@ -57,15 +57,27 @@ function removeBlurOverlay() {
 
 // 스크롤바
 
+let isScrolling = false;
+
 $(document).on('click', '.usermade-scroll-btn.right-btn', function () {
-  $('.character-usermade-div-list').scrollLeft(function(i, val) {
-    return val + 261;
+  if (isScrolling) return;
+
+  isScrolling = true;
+  $('.character-usermade-div-list').animate({
+    scrollLeft: $('.character-usermade-div-list').scrollLeft() + 261
+  }, 300, function () {
+    isScrolling = false;
   });
 });
 
 $(document).on('click', '.usermade-scroll-btn.left-btn', function () {
-  $('.character-usermade-div-list').scrollLeft(function(i, val) {
-    return val - 261;
+  if (isScrolling) return;
+
+  isScrolling = true;
+  $('.character-usermade-div-list').animate({
+    scrollLeft: $('.character-usermade-div-list').scrollLeft() - 261
+  }, 300, function () {
+    isScrolling = false;
   });
 });
 
