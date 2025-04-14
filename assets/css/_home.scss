@@ -1,23 +1,120 @@
 .home-page-div {
-    padding: 65px 0;
-    .home-main-header {
+    padding: 65px 0 50px;
+    .home-main-character,
+    .home-character-usermade {
         display: block;
         padding: 24px 0 0 24px;
         h2 {
-          font-size: 24px;
+          font-size: 23px;
           color: white;
           font-family: $font-ui;
           font-weight: 600;
+        }
+        &.home-character-usermade {
+            margin-bottom: 10px;
         }
     }
 }
 
 .character-div-list {
-    display: flex;
+    display: grid;
     gap: 25px;
     padding: 24px;
+    padding-left: 0;
+    margin: 0;
+    grid-template-columns: repeat(auto-fit, 236px);
+    max-width: 1440px;
+}
+
+.character-usermade-div-list {
+    display: flex;
+    position: relative;
+    gap: 25px;
+    overflow-x: auto;
+    max-width: 1280px;
+    overflow-y: hidden;
+    padding-right: 24px;
+    scroll-behavior: smooth;
+    white-space: nowrap;
+    flex-shrink: 0;
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE, Edge */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-tap-highlight-color: transparent;
+
+    .home-character-div {
+        flex-shrink: 0;
+    }
 }
 
 .home-character-div {
+    width: 236px;
     cursor: pointer;
+    .home-character-image {
+        width: 100%;
+        height: 236px;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    h3 {
+        margin: 12px 0 8px 0;
+        font-size: 18px;
+        font-weight: 600;
+        font-family: $font-ui;
+        color: white;
+    }
+    p {
+        margin: 0;
+        white-space: normal;
+        color: #aaa;
+    }
 }
+
+
+.character-usermade-wrapper {
+    position: relative;
+    max-width: 1280px;
+    margin: 0;
+    padding: 24px 0;
+  }
+
+
+
+// user made div 스크롤
+
+.usermade-scroll-btn {
+    display: flex;
+    position: absolute;
+    top: 49%;
+    align-items: center;  /* 내부 텍스트 세로 정렬 */
+    justify-content: center;
+    user-select: none;
+    border: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: #fff;
+    transition: background-color 0.2s;
+    &.right-btn {
+      right: -1.3%;
+    }
+    &.left-btn {
+      left: -1.3%;
+    }
+    z-index: 1;
+    svg {
+        width: 29.27475px;
+        height: 29.27475px;
+        display: block;
+        color: #4b5563;
+    }
+    &:hover {
+        background-color: #e5e7eb;
+    }
+  }

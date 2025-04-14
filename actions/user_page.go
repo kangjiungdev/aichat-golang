@@ -8,7 +8,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 )
 
-func HomeHandler(c buffalo.Context) error {
+func UserPage(c buffalo.Context) error {
 	var userName string
 
 	user, err := LogIn(c)
@@ -34,18 +34,18 @@ func HomeHandler(c buffalo.Context) error {
 		characters[i].CharacterInfo = ReplaceMessages(characters[i].CharacterInfo, userName, characters[i].CharacterName)
 		characters[i].FirstMsgCharacter = ReplaceMessages(characters[i].FirstMsgCharacter, userName, characters[i].CharacterName)
 
-		var creatorUser models.User
+		var creators models.User
 
-		err := tx.Find(&creatorUser, character.CreatorID)
+		err := tx.Find(&creators, character.CreatorID)
 		if err != nil {
 			return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
 		}
-		creator[character.CreatorID] = creatorUser.UserID
+		creator[character.CreatorID] = creators.UserID
 	}
 
 	c.Set("title", "Home")
 	c.Set("characters", characters)
 	c.Set("characterCreator", creator)
 	c.Set("javascript", "pages/index.js")
-	return c.Render(http.StatusOK, r.HTML("pages/index.plush.html"))
+	return c.Render(http.StatusOK, r.HTML("pages/user-page.plush.html"))
 }

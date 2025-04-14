@@ -93,20 +93,10 @@ func ChatMainPage(c buffalo.Context) error {
 		return chats[i].UpdatedAt.After(chats[j].UpdatedAt)
 	})
 
-	creator := make(map[int]string)
-
-	for i, character := range characters {
+	for i := range characters {
 		characters[i].WorldView = ReplaceMessages(characters[i].WorldView, user.Name, characters[i].CharacterName)
 		characters[i].CharacterInfo = ReplaceMessages(characters[i].CharacterInfo, user.Name, characters[i].CharacterName)
 		characters[i].FirstMsgCharacter = ReplaceMessages(characters[i].FirstMsgCharacter, user.Name, characters[i].CharacterName)
-
-		var creators models.User
-
-		err := tx.Find(&creators, character.CreatorID)
-		if err != nil {
-			return c.Render(http.StatusInternalServerError, r.String("DB 에러: "+err.Error()))
-		}
-		creator[character.CreatorID] = creators.UserID
 	}
 
 	c.Set("title", "Chat")
@@ -114,7 +104,6 @@ func ChatMainPage(c buffalo.Context) error {
 	c.Set("user", user)
 	c.Set("chats", &chats)
 	c.Set("characters", &characters)
-	c.Set("characterCreator", creator)
 	c.Set("javascript", "pages/chat-main.js")
 
 	return c.Render(http.StatusOK, r.HTML("pages/chat-main.plush.html"))

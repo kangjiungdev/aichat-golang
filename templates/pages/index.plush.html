@@ -1,15 +1,37 @@
 <div class="home-page-div">
-    <section class="home-main-header">
-        <h2>캐릭터</h2>
-        <!-- 필터, 정렬 넣을 곳 -->
-    </section>
-    <div class="character-div-list">
-        <%= for (character) in characters { %>
-            <div class="home-character-div" data-character-id="<%= character.ID %>">
-                <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="home-character-image">
-                <h3><%= character.CharacterName %></h3>
-                <p><%= character.CharacterOnelineInfo %></p>
+    <%= if(login && characterCreator[user.ID] == user.UserID) { %>
+        <section class="home-character-usermade">
+            <h2>🔨 내가 만든 캐릭터</h2>
+            <div class="character-usermade-wrapper">
+            <div class="usermade-scroll-btn right-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
             </div>
-        <% } %>
-    </div>
+            <div class="character-usermade-div-list">
+                <%= for (character) in characters { %>
+                    <%= if(character.CreatorID == user.ID) { %>
+                        <div class="home-character-div" data-character-id="<%= character.ID %>">
+                            <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="home-character-image">
+                            <h3><%= character.CharacterName %></h3>
+                            <p><%= character.CharacterOnelineInfo %></p>
+                        </div>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+        </section>
+    <% } %>
+    <section class="home-main-character">
+        <h2>캐릭터</h2>
+        <div class="character-div-list">
+            <%= for (character) in characters { %>
+                <div class="home-character-div" data-character-id="<%= character.ID %>">
+                    <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="home-character-image">
+                    <h3><%= character.CharacterName %></h3>
+                    <p><%= character.CharacterOnelineInfo %></p>
+                </div>
+            <% } %>
+        </div>
+    </section>
 </div>

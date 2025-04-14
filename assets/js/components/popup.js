@@ -275,32 +275,43 @@ $(document).on("mouseup mouseleave", function () {
   stopScrolling();
 });
 
-export function bindScrollEvent() {
-    $(".thumbnail-row").off('scroll').on('scroll', function () {
-      const el = this;
-      const isAtRightEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
-      const $existingLeft = $(".thumb-scroll-btn.left-btn");
-      if (isAtRightEnd) {
-        stopScrolling(); // ← 스크롤 중이었으면 정지
-        $(".thumb-scroll-btn.right-btn").remove();
-      } else if ($(".thumb-scroll-btn.right-btn").length === 0) {
-        $(".thumbnail-wrapper").append(`<div class="thumb-scroll-btn right-btn">
+function bindScrollEvent() {
+  const $row = $(".thumbnail-row")[0];
+  if (!$row) return;
+
+  // 초기 확인: 콘텐츠가 넘치지 않으면 스크롤 버튼 숨기기
+  if ($row.scrollWidth <= $row.clientWidth) {
+    $(".thumb-scroll-btn").remove();
+    return; // 이벤트 바인딩하지 않음
+  }
+
+  $(".thumbnail-row").off('scroll').on('scroll', function () {
+    const el = this;
+    const isAtRightEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+    const $existingLeft = $(".thumb-scroll-btn.left-btn");
+
+    if (isAtRightEnd) {
+      stopScrolling();
+      $(".thumb-scroll-btn.right-btn").remove();
+    } else if ($(".thumb-scroll-btn.right-btn").length === 0) {
+      $(".thumbnail-wrapper").append(`<div class="thumb-scroll-btn right-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </div>`);
+    }
+
+    if (el.scrollLeft > 0) {
+      if ($existingLeft.length === 0) {
+        $(".thumbnail-wrapper").prepend(`<div class="thumb-scroll-btn left-btn">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
         </div>`);
       }
-      if (el.scrollLeft > 0) {
-        if ($existingLeft.length === 0) {
-          $(".thumbnail-wrapper").prepend(`<div class="thumb-scroll-btn left-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </div>`);
-        }
-      } else if ($existingLeft.length > 0) {
-        stopScrolling(); // ← 왼쪽 버튼 사라질 때도 정지
-        $existingLeft.remove();
-      }
-    });
+    } else if ($existingLeft.length > 0) {
+      stopScrolling();
+      $existingLeft.remove();
+    }
+  });
 }
