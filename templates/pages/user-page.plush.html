@@ -1,0 +1,27 @@
+<div class="user-page">
+    <h1 class="user-page-userinfo">캐릭터 제작자</h1>
+    <div class="user-page-header">
+        <h2><%= pageUser.UserID %></h2>
+        <div>
+            <p><%= pageUserMessageNumber %> <span class="user-page-gray-text">대화량</span></p>
+            <p class="user-page-gray-text">|</p>
+            <p><%= characterUserNumber %> <span class="user-page-gray-text">이용자</span></p>
+            <p class="user-page-gray-text">|</p>
+            <p><%= signupDate %> <span class="user-page-gray-text">가입</span></p>
+        </div>
+    </div>
+    <section class="user-page-main">
+        <div>
+            <h2>공개 캐릭터 <span class="user-page-gray-text"><%= len(characters) %></span></h2>
+        </div>
+        <div class="character-div-list userpage-character-div-list">
+            <%= for (character) in characters { %>
+                <div class="home-character-div" data-character-id="<%= character.ID %>" data-character-id="<%= character.ID %>">
+                    <img src="/<%= character.CharacterAssets[0] %>" alt="<%= character.CharacterName %>" class="home-character-image">
+                    <h3><%= character.CharacterName %></h3>
+                    <p><%= character.CharacterOnelineInfo %></p>
+                </div>
+            <% } %>
+        </div>
+    </section>
+</div>

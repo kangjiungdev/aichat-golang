@@ -24,6 +24,9 @@
     margin: 0;
     grid-template-columns: repeat(auto-fit, 236px);
     max-width: 1440px;
+    &.userpage-character-div-list {
+        grid-template-columns: repeat(5, 236px);
+    }
 }
 
 .character-usermade-div-list {

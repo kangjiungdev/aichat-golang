@@ -33,7 +33,7 @@
                 <a href="/chat">대화</a>
                 <a href="/create-character">캐릭터 생성</a>
                   <div id="user-avatar-btn">
-                    <a href="/"><%= user.UserID %></a>
+                    <a href="/user/<%= user.UserID %>"><%= user.UserID %></a>
                     <button id="logout-btn" type="submit">로그아웃</button>
                   </div>
               <% } %>

@@ -76,6 +76,8 @@ func App() *buffalo.App {
 		app.GET("/signup", SignUp)
 		app.POST("/signup", CreateAccountInDB)
 
+		app.GET("/user/{userid}", UserPage)
+
 		app.GET("/login", LogInPage)
 		app.POST("/login", GetUserData)
 
