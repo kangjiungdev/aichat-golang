@@ -33,7 +33,6 @@
     overflow-x: auto;
     max-width: 1280px;
     overflow-y: hidden;
-    padding-right: 24px;
     scroll-behavior: smooth;
     white-space: nowrap;
     flex-shrink: 0;
@@ -100,6 +99,7 @@
     border-radius: 50%;
     cursor: pointer;
     background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);;
     transition: background-color 0.2s;
     &.right-btn {
       right: -1.3%;

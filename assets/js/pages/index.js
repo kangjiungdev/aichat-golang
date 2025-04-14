@@ -57,38 +57,16 @@ function removeBlurOverlay() {
 
 // 스크롤바
 
-let scrollInterval = null;
-let scrollVelocity = 20; // 스크롤 속도(px/frame)
-let scrollDirection = 1;
-
-// 스크롤 시작
-function startScrolling(direction) {
-  stopScrolling(); // 중복 방지
-  scrollDirection = direction;
-  scrollInterval = setInterval(() => {
-    $(".character-usermade-div-list").scrollLeft((i, current) => current + scrollVelocity * scrollDirection);
-  }, 15); // 약 60fps
-}
-
-// 스크롤 정지
-function stopScrolling() {
-  if (scrollInterval) {
-    clearInterval(scrollInterval);
-    scrollInterval = null;
-  }
-}
-
-// 버튼 이벤트 바인딩
-$(document).on("mousedown", ".usermade-scroll-btn", function () {
-  if ($(this).hasClass("right-btn")) {
-    startScrolling(1);
-  } else if ($(this).hasClass("left-btn")) {
-    startScrolling(-1);
-  }
+$(document).on('click', '.usermade-scroll-btn.right-btn', function () {
+  $('.character-usermade-div-list').scrollLeft(function(i, val) {
+    return val + 261;
+  });
 });
 
-$(document).on("mouseup mouseleave", function () {
-  stopScrolling();
+$(document).on('click', '.usermade-scroll-btn.left-btn', function () {
+  $('.character-usermade-div-list').scrollLeft(function(i, val) {
+    return val - 261;
+  });
 });
 
 bindUsermadeScrollEvent()
@@ -109,7 +87,6 @@ function bindUsermadeScrollEvent() {
     const $existingLeft = $(".usermade-scroll-btn.left-btn");
 
     if (isAtRightEnd) {
-      stopScrolling();
       $(".usermade-scroll-btn.right-btn").remove();
     } else if ($(".usermade-scroll-btn.right-btn").length === 0) {
       $(".character-usermade-wrapper").append(`<div class="usermade-scroll-btn right-btn">
@@ -128,7 +105,6 @@ function bindUsermadeScrollEvent() {
         </div>`);
       }
     } else if ($existingLeft.length > 0) {
-      stopScrolling();
       $existingLeft.remove();
     }
   });
